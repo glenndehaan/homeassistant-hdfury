@@ -3,6 +3,7 @@
   "name": "HDFury",
   "version": "1.0.0",
   "documentation": "https://github.com/glenndehaan/homeassistant-hdfury",
+  "issue_tracker": "https://github.com/glenndehaan/homeassistant-hdfury/issues",
   "config_flow": true,
   "requirements": ["aiohttp"],
   "codeowners": ["@glenndehaan"]
