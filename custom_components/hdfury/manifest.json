@@ -1,0 +1,9 @@
+{
+  "domain": "hdfury",
+  "name": "HDFury",
+  "version": "1.0.0",
+  "documentation": "https://github.com/glenndehaan/homeassistant-hdfury",
+  "config_flow": true,
+  "requirements": ["aiohttp"],
+  "codeowners": ["@glenndehaan"]
+}
