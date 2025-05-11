@@ -50,7 +50,7 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
             _LOGGER.warning("Invalid input option selected: %s", option)
             return
 
-        _LOGGER.info("Setting %s to %s", self._key, input_number)
+        _LOGGER.debug("Setting %s to %s", self._key, input_number)
 
         url = get_cmd_insel_url(self.coordinator.host, f"{input_number}%204")
 
