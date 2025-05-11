@@ -25,3 +25,6 @@ def get_info_url(host):
 
 def get_brd_url(host):
     return f"{get_base_url(host)}/ssi/brdinfo.ssi"
+
+def get_cmd_url(host, option):
+    return f"{get_base_url(host)}/cmd?insel={option}"

@@ -10,6 +10,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HDFuryCoordinator
 from .const import DOMAIN, SELECT_MAP
+from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
         self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
         self._attr_device_info = coordinator.device_info
-        self._attr_options = ["0", "1", "2", "3", "4"]
+        self._attr_options = ["0", "1", "2", "3"]
 
     @property
     def current_option(self):
@@ -45,12 +46,7 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
     async def async_select_option(self, option: str):
         _LOGGER.info("Setting %s to %s", self._key, option)
 
-        host = self.coordinator.brdinfo.get("ipaddress")
-        if not host:
-            _LOGGER.error("No IP address found in board info")
-            return
-
-        url = f"http://{host}/cmd?insel={option}%204"
+        url = get_cmd_url(self.coordinator.host, f"{option}%204")
 
         async with aiohttp.ClientSession() as session:
             try:
