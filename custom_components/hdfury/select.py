@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HDFuryCoordinator
-from .const import DOMAIN, SELECT_MAP
+from .const import DOMAIN, INPUT_OPTIONS, REVERSE_INPUT_OPTIONS, SELECT_MAP
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,17 +36,23 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
         self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
         self._attr_device_info = coordinator.device_info
-        self._attr_options = ["0", "1", "2", "3"]
+        self._attr_options = list(INPUT_OPTIONS.values())
 
     @property
     def current_option(self):
         # Pull live value from coordinator every update
-        return self.coordinator.data.get(self._key)
+        raw_value = self.coordinator.data.get("portseltx0", "0")
+        return INPUT_OPTIONS.get(raw_value, f"Input {int(raw_value) + 1}")
 
     async def async_select_option(self, option: str):
-        _LOGGER.info("Setting %s to %s", self._key, option)
+        input_number = REVERSE_INPUT_OPTIONS.get(option)
+        if input_number is None:
+            _LOGGER.warning("Invalid input option selected: %s", option)
+            return
 
-        url = get_cmd_url(self.coordinator.host, f"{option}%204")
+        _LOGGER.info("Setting %s to %s", self._key, input_number)
+
+        url = get_cmd_url(self.coordinator.host, f"{input_number}%204")
 
         async with aiohttp.ClientSession() as session:
             try:

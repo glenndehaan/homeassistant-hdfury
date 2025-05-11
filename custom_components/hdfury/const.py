@@ -42,3 +42,11 @@ DIAGNOSTIC_KEYS = {
     "EDIDA2",
     "EARCRX",
 }
+
+INPUT_OPTIONS = {
+    "0": "Input 1",
+    "1": "Input 2",
+    "2": "Input 3",
+    "3": "Input 4",
+}
+REVERSE_INPUT_OPTIONS = {v: k for k, v in INPUT_OPTIONS.items()}
