@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HDFuryCoordinator
 from .const import DOMAIN, INPUT_OPTIONS, REVERSE_INPUT_OPTIONS, SELECT_MAP
-from .helpers import get_cmd_url
+from .helpers import get_cmd_insel_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
 
         _LOGGER.info("Setting %s to %s", self._key, input_number)
 
-        url = get_cmd_url(self.coordinator.host, f"{input_number}%204")
+        url = get_cmd_insel_url(self.coordinator.host, f"{input_number}%204")
 
         async with aiohttp.ClientSession() as session:
             try:

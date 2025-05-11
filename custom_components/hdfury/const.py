@@ -1,5 +1,5 @@
 DOMAIN = "hdfury"
-PLATFORMS = ["select", "sensor"]
+PLATFORMS = ["button", "select", "sensor"]
 
 CONF_HOST = "host"
 
