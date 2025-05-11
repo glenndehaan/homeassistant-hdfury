@@ -38,12 +38,3 @@ DIAGNOSTIC_KEYS = {
     "EDIDA2",
     "EARCRX",
 }
-
-def get_base_url(host):
-    return f"http://{host}"
-
-def get_info_url(host):
-    return f"http://{host}/ssi/infopage.ssi"
-
-def get_brd_url(host):
-    return f"http://{host}/ssi/brdinfo.ssi"

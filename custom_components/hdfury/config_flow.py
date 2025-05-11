@@ -4,7 +4,8 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST
 
-from .const import DOMAIN, get_info_url
+from .const import DOMAIN
+from .helpers import get_info_url
 
 class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
