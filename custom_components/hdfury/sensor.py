@@ -30,7 +30,7 @@ class HDFurySensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, icon: str):
         super().__init__(coordinator)
         self._key = key
-        self._attr_name = name
+        self._attr_name = f"{coordinator.device_name} {name}"
         self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
         self._attr_device_info = coordinator.device_info

@@ -23,9 +23,10 @@ class HDFuryCoordinator(DataUpdateCoordinator):
         self.host = host
         self.brdinfo = brdinfo
         self.confinfo = confinfo
+        self.device_name = f"HDFury {brdinfo["hostname"]}"
         self.device_info = DeviceInfo(
             identifiers={(DOMAIN, brdinfo["serial"])},
-            name=brdinfo["hostname"],
+            name=f"HDFury {brdinfo["hostname"]}",
             manufacturer="HDFury",
             model=brdinfo["hostname"].split('-')[0],
             serial_number=brdinfo["serial"],

@@ -26,8 +26,8 @@ async def async_setup_entry(
 class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = "Reboot"
-        self._attr_unique_id = f"{coordinator.brdinfo.get('serial')}_reboot"
+        self._attr_name = f"{coordinator.device_name} Reboot"
+        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_reboot"
         self._attr_device_info = coordinator.device_info
         self._attr_entity_category = EntityCategory.CONFIG
         self._attr_icon = "mdi:restart"
