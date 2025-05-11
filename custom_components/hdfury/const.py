@@ -1,7 +1,12 @@
 DOMAIN = "hdfury"
-PLATFORMS = ["sensor"]
+PLATFORMS = ["select", "sensor"]
 
 CONF_HOST = "host"
+
+SELECT_MAP = {
+    "portseltx0": ("Port Selector TX0", "mdi:hdmi-port"),
+    "portseltx1": ("Port Selector TX1", "mdi:hdmi-port"),
+}
 
 SENSOR_MAP = {
     "portseltx0": ("Port Selector TX0", "mdi:hdmi-port"),

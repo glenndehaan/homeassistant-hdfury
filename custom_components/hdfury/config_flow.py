@@ -16,7 +16,7 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             host = user_input[CONF_HOST]
             if await self._validate_connection(host):
                 return self.async_create_entry(
-                    title=f"HDFury VRROOM ({host})", data=user_input
+                    title=f"HDFury ({host})", data=user_input
                 )
             else:
                 errors["base"] = "cannot_connect"
