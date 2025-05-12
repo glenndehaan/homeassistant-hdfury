@@ -1,11 +1,11 @@
 {
   "domain": "hdfury",
   "name": "HDFury",
-  "version": "1.0.0",
-  "documentation": "https://github.com/glenndehaan/homeassistant-hdfury",
-  "issue_tracker": "https://github.com/glenndehaan/homeassistant-hdfury/issues",
-  "iot_class": "local_polling",
+  "codeowners": ["@glenndehaan"],
   "config_flow": true,
+  "documentation": "https://github.com/glenndehaan/homeassistant-hdfury",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/glenndehaan/homeassistant-hdfury/issues",
   "requirements": ["aiohttp"],
-  "codeowners": ["@glenndehaan"]
+  "version": "1.0.0"
 }
