@@ -37,12 +37,27 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
         self._attr_device_info = coordinator.device_info
         self._attr_options = list(INPUT_OPTIONS.values())
+        self._raw_value = None
 
     @property
     def current_option(self):
         # Pull live value from coordinator every update
-        raw_value = self.coordinator.data.get("portseltx0", "0")
-        return INPUT_OPTIONS.get(raw_value, f"Input {int(raw_value) + 1}")
+        raw_value = self.coordinator.data.get(self._key, None)
+        self._raw_value = raw_value  # Store raw value for attribute
+        return INPUT_OPTIONS.get(raw_value)
+
+    @property
+    def extra_state_attributes(self):
+        return {
+            "raw_value": self._raw_value
+        }
+
+    @property
+    def available(self) -> bool:
+        # Disable selector if TX1 is locked to 4
+        if self._raw_value == "4":
+            return False
+        return True
 
     async def async_select_option(self, option: str):
         input_number = REVERSE_INPUT_OPTIONS.get(option)

@@ -5,11 +5,10 @@ CONF_HOST = "host"
 
 SELECT_MAP = {
     "portseltx0": ("Port Selector TX0", "mdi:hdmi-port"),
+    "portseltx1": ("Port Selector TX1", "mdi:hdmi-port"),
 }
 
 SENSOR_MAP = {
-    "portseltx0": ("Port Selector TX0", "mdi:hdmi-port"),
-    "portseltx1": ("Port Selector TX1", "mdi:hdmi-port"),
     "RX0": ("Input RX0", "mdi:video-input-hdmi"),
     "RX1": ("Input RX1", "mdi:video-input-hdmi"),
     "TX0": ("Output TX0", "mdi:cable-data"),
@@ -48,5 +47,6 @@ INPUT_OPTIONS = {
     "1": "Input 2",
     "2": "Input 3",
     "3": "Input 4",
+    "4": "Copy TX"
 }
 REVERSE_INPUT_OPTIONS = {v: k for k, v in INPUT_OPTIONS.items()}

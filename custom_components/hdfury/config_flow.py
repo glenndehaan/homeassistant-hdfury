@@ -14,12 +14,21 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             host = user_input[CONF_HOST]
-            if await self._validate_connection(host):
-                return self.async_create_entry(
-                    title=f"HDFury ({host})", data=user_input
-                )
-            else:
-                errors["base"] = "cannot_connect"
+
+            # Check for existing entry with same host
+            for entry in self._async_current_entries():
+                if entry.data.get("host") == host:
+                    errors["base"] = "already_configured"
+                    break
+
+            if not errors:
+                # Proceed normally
+                if await self._validate_connection(host):
+                    return self.async_create_entry(
+                        title=f"HDFury ({host})", data=user_input
+                    )
+                else:
+                    errors["base"] = "cannot_connect"
 
         return self.async_show_form(
             step_id="user",
