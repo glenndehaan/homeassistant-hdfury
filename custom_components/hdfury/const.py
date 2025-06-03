@@ -49,4 +49,10 @@ INPUT_OPTIONS = {
     "3": "Input 4",
     "4": "Copy TX"
 }
-REVERSE_INPUT_OPTIONS = {v: k for k, v in INPUT_OPTIONS.items()}
+
+INPUT_LABELS = {
+    "Input 1": "Input 1",
+    "Input 2": "Input 2",
+    "Input 3": "Input 3",
+    "Input 4": "Input 4"
+}

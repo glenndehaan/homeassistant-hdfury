@@ -17,6 +17,8 @@ async def async_setup_entry(
         config_entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
 ):
+    """Set up buttons using the platform schema."""
+
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = []
@@ -27,7 +29,11 @@ async def async_setup_entry(
     async_add_entities(entities, True)
 
 class HDFurySensor(CoordinatorEntity, SensorEntity):
+    """Base HDFury Sensor Class."""
+
     def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, icon: str):
+        """Register Sensor."""
+
         super().__init__(coordinator)
         self._key = key
         self._attr_name = f"{coordinator.device_name} {name}"
@@ -39,4 +45,6 @@ class HDFurySensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
+        """Set Sensor Value."""
+
         return self.coordinator.data.get(self._key)

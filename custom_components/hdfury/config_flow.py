@@ -6,12 +6,18 @@ from homeassistant.const import CONF_HOST
 
 from .const import DOMAIN
 from .helpers import get_info_url
+from .options_flow import HDFuryOptionsFlow
 
 class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle Config Flow for HDFury."""
+
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
+        """Handle Initial Setup."""
+
         errors = {}
+
         if user_input is not None:
             host = user_input[CONF_HOST]
 
@@ -38,6 +44,7 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _validate_connection(self, host):
         """Try to fetch data to confirm it's a valid HDFury device."""
+
         url = get_info_url(host)
         try:
             async with aiohttp.ClientSession() as session:
@@ -46,3 +53,8 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except Exception:
             return False
         return False
+
+    def async_get_options_flow(config_entry):
+        """Register Options Flow for HDFury."""
+
+        return HDFuryOptionsFlow(config_entry)

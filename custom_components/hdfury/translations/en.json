@@ -13,5 +13,13 @@
       "cannot_connect": "Cannot connect to the HDFury device. Check the IP address.",
       "already_configured": "This device is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Customize Input Labels",
+        "description": "Set user-friendly names for each HDMI input."
+      }
+    }
   }
 }

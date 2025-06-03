@@ -3,9 +3,9 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN, PLATFORMS
 from .helpers import fetch_json, get_base_url, get_brd_url, get_conf_url, get_info_url
@@ -13,7 +13,11 @@ from .helpers import fetch_json, get_base_url, get_brd_url, get_conf_url, get_in
 _LOGGER = logging.getLogger(__name__)
 
 class HDFuryCoordinator(DataUpdateCoordinator):
+    """HDFury Device Coordinator Class."""
+
     def __init__(self, hass: HomeAssistant, host: str, brdinfo: dict, confinfo: dict):
+        """Register HDFury Device."""
+
         super().__init__(
             hass,
             _LOGGER,
@@ -37,12 +41,16 @@ class HDFuryCoordinator(DataUpdateCoordinator):
         )
 
     async def _async_update_data(self):
+        """Poll HDFury Data."""
+
         data = await fetch_json(get_info_url(self.host))
         if not data:
             raise UpdateFailed("Failed to fetch infopage.ssi")
         return data
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Set up HDFury from a config entry."""
+
     hass.data.setdefault(DOMAIN, {})
 
     host = entry.data["host"]
@@ -61,11 +69,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Unload a HDFury config entry."""
+
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unloaded:
         hass.data[DOMAIN].pop(entry.entry_id)
     return unloaded
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Reload integration when options are updated."""
+
+    await hass.config_entries.async_reload(entry.entry_id)

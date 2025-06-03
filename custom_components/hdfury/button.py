@@ -19,12 +19,18 @@ async def async_setup_entry(
         config_entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
 ):
+    """Set up buttons using the platform schema."""
+
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     async_add_entities([HDFuryRebootButton(coordinator)], True)
 
 class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
+    """HDFury Reset Button Class."""
+
     def __init__(self, coordinator):
+        """Register Button."""
+
         super().__init__(coordinator)
         self._attr_name = f"{coordinator.device_name} Reboot"
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_reboot"
@@ -33,6 +39,8 @@ class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
         self._attr_icon = "mdi:restart"
 
     async def async_press(self):
+        """Handle Button Press."""
+
         url = get_cmd_rst_url(self.coordinator.host)
         _LOGGER.debug("Sending reboot command to HDFury: %s", url)
 
