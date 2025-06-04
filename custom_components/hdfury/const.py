@@ -9,50 +9,33 @@ SELECT_MAP = {
 }
 
 SENSOR_MAP = {
-    "RX0": ("Input RX0", "mdi:video-input-hdmi"),
-    "RX1": ("Input RX1", "mdi:video-input-hdmi"),
-    "TX0": ("Output TX0", "mdi:cable-data"),
-    "TX1": ("Output TX1", "mdi:cable-data"),
-    "AUD0": ("Audio TX0", "mdi:audio-input-rca"),
-    "AUD1": ("Audio TX1", "mdi:audio-input-rca"),
-    "AUDOUT": ("Audio Output", "mdi:television-speaker"),
-    "SINK0": ("EDID TX0", "mdi:television"),
-    "EDIDA0": ("EDID TXA0", "mdi:format-list-text"),
-    "SINK1": ("EDID TX1", "mdi:television"),
-    "EDIDA1": ("EDID TXA1", "mdi:format-list-text"),
-    "SINK2": ("EDID AUD", "mdi:audio-video"),
-    "EDIDA2": ("EDID AUDA", "mdi:format-list-text"),
-    "EARCRX": ("eARC/ARC Status", "mdi:audio-video"),
-}
-
-DIAGNOSTIC_KEYS = {
-    "RX0",
-    "RX1",
-    "TX0",
-    "TX1",
-    "AUD0",
-    "AUD1",
-    "AUDOUT",
-    "SINK0",
-    "SINK1",
-    "SINK2",
-    "EDIDA0",
-    "EDIDA1",
-    "EDIDA2",
-    "EARCRX",
+    "RX0": ("Input RX0", "mdi:video-input-hdmi", "diagnostic"),
+    "RX1": ("Input RX1", "mdi:video-input-hdmi", "diagnostic"),
+    "TX0": ("Output TX0", "mdi:cable-data", "diagnostic"),
+    "TX1": ("Output TX1", "mdi:cable-data", "diagnostic"),
+    "AUD0": ("Audio TX0", "mdi:audio-input-rca", "diagnostic"),
+    "AUD1": ("Audio TX1", "mdi:audio-input-rca", "diagnostic"),
+    "AUDOUT": ("Audio Output", "mdi:television-speaker", "diagnostic"),
+    "SINK0": ("EDID TX0", "mdi:television", "diagnostic"),
+    "EDIDA0": ("EDID TXA0", "mdi:format-list-text", "diagnostic"),
+    "SINK1": ("EDID TX1", "mdi:television", "diagnostic"),
+    "EDIDA1": ("EDID TXA1", "mdi:format-list-text", "diagnostic"),
+    "SINK2": ("EDID AUD", "mdi:audio-video", "diagnostic"),
+    "EDIDA2": ("EDID AUDA", "mdi:format-list-text", "diagnostic"),
+    "EARCRX": ("eARC/ARC Status", "mdi:audio-video", "diagnostic"),
 }
 
 INPUT_OPTIONS = {
-    "0": "Input 1",
-    "1": "Input 2",
-    "2": "Input 3",
-    "3": "Input 4",
+    "0": "Input 0",
+    "1": "Input 1",
+    "2": "Input 2",
+    "3": "Input 3",
     "4": "Copy TX"
 }
 
 INPUT_LABELS = {
+    "Input 0": "Input 0",
     "Input 1": "Input 1",
     "Input 2": "Input 2",
-    "Input 3": "Input 3",
-    "Input 4": "Input 4"
+    "Input 3": "Input 3"
 }

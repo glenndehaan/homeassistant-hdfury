@@ -25,14 +25,20 @@ async def async_setup_entry(
 
     # Load custom labels if present
     custom_labels = config_entry.options.get("option_labels", {})
-    label_map = {
-        k: custom_labels.get(v, v) for k, v in INPUT_OPTIONS.items()
-    }
-    reverse_label_map = {v: k for k, v in label_map.items()}
 
     entities = []
     for key, (name, icon) in SELECT_MAP.items():
         if key in coordinator.data:
+            tx_index = 0 if "0" in key else 1
+            copy_label = f"Copy TX{1 - tx_index}"
+
+            # Build a custom label map for this TX selector
+            label_map = {
+                k: (custom_labels.get(v, v) if k != "4" else copy_label)
+                for k, v in INPUT_OPTIONS.items()
+            }
+            reverse_label_map = {v: k for k, v in label_map.items()}
+
             entities.append(HDFuryPortSelect(
                 coordinator, key, name, icon, label_map, reverse_label_map
             ))
@@ -42,7 +48,7 @@ async def async_setup_entry(
 class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
     """Class to handle fetching and storing HDFury Port Select data."""
 
-    def __init__(self, coordinator, key, name, icon, label_map, reverse_map):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, icon: str, label_map: dict[str, str], reverse_map: dict[str, str]):
         """Register Select."""
 
         super().__init__(coordinator)

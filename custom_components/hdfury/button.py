@@ -28,7 +28,7 @@ async def async_setup_entry(
 class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
     """HDFury Reset Button Class."""
 
-    def __init__(self, coordinator):
+    def __init__(self, coordinator: HDFuryCoordinator):
         """Register Button."""
 
         super().__init__(coordinator)

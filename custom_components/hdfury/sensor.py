@@ -8,7 +8,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HDFuryCoordinator
-from .const import DIAGNOSTIC_KEYS, DOMAIN, SENSOR_MAP
+from .const import DOMAIN, SENSOR_MAP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,16 +22,16 @@ async def async_setup_entry(
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = []
-    for key, (name, icon) in SENSOR_MAP.items():
+    for key, (name, icon, category) in SENSOR_MAP.items():
         if key in coordinator.data:
-            entities.append(HDFurySensor(coordinator, key, name, icon))
+            entities.append(HDFurySensor(coordinator, key, name, icon, category))
 
     async_add_entities(entities, True)
 
 class HDFurySensor(CoordinatorEntity, SensorEntity):
     """Base HDFury Sensor Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, icon: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, icon: str, category: str):
         """Register Sensor."""
 
         super().__init__(coordinator)
@@ -40,7 +40,7 @@ class HDFurySensor(CoordinatorEntity, SensorEntity):
         self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
         self._attr_device_info = coordinator.device_info
-        if key in DIAGNOSTIC_KEYS:
+        if category == "diagnostic":
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
