@@ -1,0 +1,15 @@
+{
+  "name": "hdfury-emulator",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start:vrroom": "HDFURY_DEVICE=vrroom node --watch index.js",
+    "start:diva": "HDFURY_DEVICE=diva node --watch index.js"
+  },
+  "author": "Glenn de Haan",
+  "license": "MIT",
+  "description": "NPM packages for hdfury-emulator",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

@@ -4,3 +4,6 @@
 # General files
 *~
 *.DS_STORE
+
+# NPM
+node_modules
