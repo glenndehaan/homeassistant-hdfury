@@ -35,7 +35,7 @@ class HDFuryCoordinator(DataUpdateCoordinator):
             model=brdinfo["hostname"].split('-')[0],
             serial_number=brdinfo["serial"],
             sw_version=brdinfo["version"].removeprefix("FW: "),
-            hw_version=brdinfo["pcbv"],
+            hw_version=brdinfo.get("pcbv"),
             configuration_url=get_base_url(host),
             connections={(dr.CONNECTION_NETWORK_MAC, confinfo["macaddr"])},
         )

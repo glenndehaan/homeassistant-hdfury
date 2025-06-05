@@ -14,6 +14,7 @@ async def fetch_json(url):
             async with session.get(url) as resp:
                 if resp.status == 200:
                     text = await resp.text()
+                    _LOGGER.debug("HTTP Body: %s", text)
                     return json.loads(text)
                 _LOGGER.error("Non-200 response: %s", resp.status)
     except Exception as e:
