@@ -16,6 +16,7 @@ This custom integration allows Home Assistant to monitor and control compatible 
 Tested with the following HDFury devices:
 
 * VRROOM
+* Diva
 
 ## Installation
 
@@ -59,7 +60,8 @@ This integration will expose:
 
 * **Sensors**: HDMI port state, audio output status, EDID info
 * **Selects**: Input selection for HDMI TX ports (with custom labels)
-* **Buttons**: Reboot device
+* **Buttons**: Reboot device, Issue Hotplug
+* **Switches**: Auto Switch Input, HTPC Modes, Audio Mutes, OLED Display, Infrared and Relay.
 
 Each device is identified using its serial number and MAC address to ensure uniqueness across multiple HDFury units.
 

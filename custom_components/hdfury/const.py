@@ -1,5 +1,5 @@
 DOMAIN = "hdfury"
-PLATFORMS = ["button", "select", "sensor"]
+PLATFORMS = ["button", "select", "sensor", "switch"]
 
 CONF_HOST = "host"
 
@@ -23,6 +23,19 @@ SENSOR_MAP = {
     "SINK2": ("EDID AUD", "mdi:audio-video", "diagnostic"),
     "EDIDA2": ("EDID AUDA", "mdi:format-list-text", "diagnostic"),
     "EARCRX": ("eARC/ARC Status", "mdi:audio-video", "diagnostic"),
+}
+
+SWITCH_MAP = {
+    "autosw": ("Auto Switch Inputs", "autosw", "mdi:import", "configuration"),
+    "htpcmode0": ("HTPC Mode RX0", "htpcmode0", "mdi:desktop-classic", "configuration"),
+    "htpcmode1": ("HTPC Mode RX1", "htpcmode1", "mdi:desktop-classic", "configuration"),
+    "htpcmode2": ("HTPC Mode RX2", "htpcmode2", "mdi:desktop-classic", "configuration"),
+    "htpcmode3": ("HTPC Mode RX3", "htpcmode3", "mdi:desktop-classic", "configuration"),
+    "mutetx0": ("Mute TX0 Audio", "mutetx0audio", "mdi:volume-mute", "configuration"),
+    "mutetx1": ("Mute TX1 Audio", "mutetx1audio", "mdi:volume-mute", "configuration"),
+    "oled": ("OLED Display", "oled", "mdi:cellphone-information", "configuration"),
+    "iractive": ("Infrared", "iractive", "mdi:remote", "configuration"),
+    "relay": ("Relay", "relay", "mdi:electric-switch", "configuration"),
 }
 
 INPUT_OPTIONS = {

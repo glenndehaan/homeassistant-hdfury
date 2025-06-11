@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HDFuryCoordinator
 from .const import DOMAIN
-from .helpers import get_cmd_rst_url
+from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ async def async_setup_entry(
 
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    async_add_entities([HDFuryRebootButton(coordinator)], True)
+    async_add_entities([HDFuryRebootButton(coordinator), HDFuryIssueHotplugButton(coordinator)], True)
 
 class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
     """HDFury Reset Button Class."""
@@ -41,7 +41,7 @@ class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
     async def async_press(self):
         """Handle Button Press."""
 
-        url = get_cmd_rst_url(self.coordinator.host)
+        url = get_cmd_url(self.coordinator.host, "reboot")
         _LOGGER.debug("Sending reboot command to HDFury: %s", url)
 
         async with async_get_clientsession(self.hass).get(url) as response:
@@ -49,3 +49,28 @@ class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
                 _LOGGER.info("Reboot command sent successfully")
             else:
                 _LOGGER.error("Failed to reboot HDFury device: %s", await response.text())
+
+class HDFuryIssueHotplugButton(CoordinatorEntity, ButtonEntity):
+    """HDFury Issue Hotplug Button Class."""
+
+    def __init__(self, coordinator: HDFuryCoordinator):
+        """Register Button."""
+
+        super().__init__(coordinator)
+        self._attr_name = f"{coordinator.device_name} Issue Hotplug"
+        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_issue_hotplug"
+        self._attr_device_info = coordinator.device_info
+        self._attr_entity_category = EntityCategory.CONFIG
+        self._attr_icon = "mdi:restart"
+
+    async def async_press(self):
+        """Handle Button Press."""
+
+        url = get_cmd_url(self.coordinator.host, "hotplug")
+        _LOGGER.debug("Sending hotplug command to HDFury: %s", url)
+
+        async with async_get_clientsession(self.hass).get(url) as response:
+            if response.status == 200:
+                _LOGGER.info("Hotplug command sent successfully")
+            else:
+                _LOGGER.error("Failed to hotplug HDFury device: %s", await response.text())

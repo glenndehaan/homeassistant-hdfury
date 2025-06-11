@@ -41,12 +41,7 @@ def get_info_url(host):
 
     return f"{get_base_url(host)}/ssi/infopage.ssi"
 
-def get_cmd_insel_url(host, option):
-    """Return HDFury Device Port Select URL."""
+def get_cmd_url(host, cmd, option = ""):
+    """Return HDFury Command URL."""
 
-    return f"{get_base_url(host)}/cmd?insel={option}"
-
-def get_cmd_rst_url(host):
-    """Return HDFury Device Restart URL."""
-
-    return f"{get_base_url(host)}/cmd?reboot="
+    return f"{get_base_url(host)}/cmd?{cmd}={option}"

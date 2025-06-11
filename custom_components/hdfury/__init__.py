@@ -46,6 +46,14 @@ class HDFuryCoordinator(DataUpdateCoordinator):
         data = await fetch_json(get_info_url(self.host))
         if not data:
             raise UpdateFailed("Failed to fetch infopage.ssi")
+
+        # Also update confinfo on every poll
+        conf_data = await fetch_json(get_conf_url(self.host))
+        if conf_data:
+            self.confinfo = conf_data
+        else:
+            _LOGGER.warning("Failed to fetch confinfo.ssi; retaining previous confinfo")
+
         return data
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
