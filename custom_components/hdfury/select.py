@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import aiohttp
@@ -79,22 +80,37 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
             "raw_value": self._raw_value
         }
 
-    @property
-    def available(self) -> bool:
-        """Disable Port Select when following other TX."""
-
-        return self._raw_value != "4"
-
     async def async_select_option(self, option: str):
         """Handle Port Select."""
 
+        # Map user-friendly label back to raw input value
         raw_value = self._reverse_map.get(option)
         if raw_value is None:
             _LOGGER.warning("Invalid input option selected: %s", option)
             return
 
         _LOGGER.debug("Setting %s to %s", self._key, raw_value)
-        url = get_cmd_url(self.coordinator.host, "insel", f"{raw_value}%204")
+
+        # Update local data first
+        self.coordinator.data[self._key] = raw_value
+
+        # --- Remap both TX0 and TX1 current selections ---
+        tx0_raw = self.coordinator.data.get("portseltx0")
+        tx1_raw = self.coordinator.data.get("portseltx1")
+
+        # If either missing, skip to avoid incomplete updates
+        if tx0_raw is None or tx1_raw is None:
+            _LOGGER.error("TX states incomplete: tx0=%s, tx1=%s", tx0_raw, tx1_raw)
+            return
+
+        # Construct combined URL (both TX inputs in same command)
+        url = get_cmd_url(
+            self.coordinator.host,
+            "insel",
+            f"{tx0_raw}%20{tx1_raw}"
+        )
+
+        _LOGGER.debug("Sending combined insel command: %s", url)
 
         async with aiohttp.ClientSession() as session:
             try:
@@ -106,5 +122,7 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
             except Exception as e:
                 _LOGGER.error("Error switching input: %s", e)
 
-        self.coordinator.data[self._key] = raw_value
+        # Wait for the device to process new state
+        await asyncio.sleep(2)
+        # Trigger HA state refresh
         await self.coordinator.async_request_refresh()

@@ -22,7 +22,7 @@ class HDFuryCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name="HDFury",
-            update_interval=timedelta(seconds=10),
+            update_interval=timedelta(seconds=30),
         )
         self.host = host
         self.brdinfo = brdinfo
