@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HDFuryCoordinator
-from .const import DOMAIN, INPUT_OPTIONS, SELECT_MAP
+from .const import DOMAIN, INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_MAP
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,6 +43,10 @@ async def async_setup_entry(
             entities.append(HDFuryPortSelect(
                 coordinator, key, name, icon, label_map, reverse_label_map
             ))
+
+    # Add OPMODE select if present
+    if "opmode" in coordinator.data:
+        entities.append(HDFuryOpModeSelect(coordinator))
 
     async_add_entities(entities, True)
 
@@ -104,11 +108,7 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
             return
 
         # Construct combined URL (both TX inputs in same command)
-        url = get_cmd_url(
-            self.coordinator.host,
-            "insel",
-            f"{tx0_raw}%20{tx1_raw}"
-        )
+        url = get_cmd_url(self.coordinator.host, "insel", f"{tx0_raw}%20{tx1_raw}")
 
         _LOGGER.debug("Sending combined insel command: %s", url)
 
@@ -121,6 +121,64 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
                         )
             except Exception as e:
                 _LOGGER.error("Error switching input: %s", e)
+
+        # Wait for the device to process new state
+        await asyncio.sleep(2)
+        # Trigger HA state refresh
+        await self.coordinator.async_request_refresh()
+
+class HDFuryOpModeSelect(CoordinatorEntity, SelectEntity):
+    """Handle operation mode selection (opmode)."""
+
+    def __init__(self, coordinator: HDFuryCoordinator):
+        """Initialize OpMode select entity."""
+        super().__init__(coordinator)
+
+        self._key = "opmode"
+        self._attr_name = f"{coordinator.device_name} Operation Mode"
+        self._attr_icon = "mdi:cogs"
+        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_opmode"
+        self._attr_device_info = coordinator.device_info
+        self._attr_options = list(OPMODE_OPTIONS.values())
+
+        # Build reverse lookup for command sending
+        self._reverse_map = {v: k for k, v in OPMODE_OPTIONS.items()}
+        self._raw_value = None
+
+    @property
+    def current_option(self):
+        """Return the current operation mode."""
+        raw_value = self.coordinator.data.get(self._key)
+        self._raw_value = raw_value
+        return OPMODE_OPTIONS.get(raw_value, f"Unknown ({raw_value})")
+
+    @property
+    def extra_state_attributes(self):
+        """Expose raw value for debugging."""
+        return {
+            "raw_value": self._raw_value
+        }
+
+    async def async_select_option(self, option: str):
+        """Change the operation mode."""
+        raw_value = self._reverse_map.get(option)
+        if raw_value is None:
+            _LOGGER.warning("Invalid opmode selected: %s", option)
+            return
+
+        _LOGGER.debug("Setting operation mode to %s (%s)", option, raw_value)
+        self.coordinator.data[self._key] = raw_value
+
+        # Send command to device
+        url = get_cmd_url(self.coordinator.host, "opmode", raw_value)
+
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, timeout=5) as response:
+                    if response.status != 200:
+                        _LOGGER.warning("Failed to set opmode: %s (%s)", url, response.status)
+            except Exception as e:
+                _LOGGER.error("Error setting opmode: %s", e)
 
         # Wait for the device to process new state
         await asyncio.sleep(2)
