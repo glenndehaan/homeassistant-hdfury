@@ -11,8 +11,8 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import HDFuryCoordinator
 from .const import DOMAIN
+from .coordinator import HDFuryCoordinator
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)

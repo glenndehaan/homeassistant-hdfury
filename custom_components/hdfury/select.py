@@ -10,8 +10,8 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import HDFuryCoordinator
 from .const import DOMAIN, INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_MAP
+from .coordinator import HDFuryCoordinator
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
