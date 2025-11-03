@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from aiohttp import ClientError
+
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -57,27 +59,49 @@ class HDFurySwitch(CoordinatorEntity, SwitchEntity):
         """Handle Switch On Event."""
 
         url = get_cmd_url(self.coordinator.host, self._cmd, "on")
-        _LOGGER.debug("Sending %s command to HDFury: %s", self._cmd, url)
+        session = async_get_clientsession(self.hass)
 
-        async with async_get_clientsession(self.hass).get(url) as response:
-            if response.status == 200:
-                _LOGGER.info("%s command sent successfully", self._cmd)
-                await asyncio.sleep(2)  # Wait for the device to process new state
-                await self.coordinator.async_request_refresh()
-            else:
-                _LOGGER.error("Failed to %s HDFury device: %s", self._cmd, await response.text())
+        _LOGGER.debug("Sending %s command: %s", self._cmd, url)
+
+        try:
+            async with session.get(url, timeout=10) as response:
+                if response.status != 200:
+                    _LOGGER.warning("Failed to set %s on %s (HTTP %s)", self._cmd, url, response.status)
+                else:
+                    _LOGGER.debug("Successfully set %s on %s", self._cmd, url)
+                    await asyncio.sleep(2)  # Wait for the device to process new state
+                    await self.coordinator.async_request_refresh()
+
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout while setting %s on %s", self._cmd, url)
+        except ClientError as err:
+            _LOGGER.warning("Client error while setting %s on %s: %s", self._cmd, url, err)
+        except Exception as err:
+            _LOGGER.exception("Unexpected error setting %s on %s: %s", self._cmd, url, err)
 
     async def async_turn_off(self, **kwargs):
         """Handle Switch Off Event."""
 
         url = get_cmd_url(self.coordinator.host, self._cmd, "off")
-        async with async_get_clientsession(self.hass).get(url) as response:
-            if response.status == 200:
-                _LOGGER.info("%s command sent successfully", self._cmd)
-                await asyncio.sleep(2)  # Wait for the device to process new state
-                await self.coordinator.async_request_refresh()
-            else:
-                _LOGGER.error("Failed to %s HDFury device: %s", self._cmd, await response.text())
+        session = async_get_clientsession(self.hass)
+
+        _LOGGER.debug("Sending %s command: %s", self._cmd, url)
+
+        try:
+            async with session.get(url, timeout=10) as response:
+                if response.status != 200:
+                    _LOGGER.warning("Failed to set %s on %s (HTTP %s)", self._cmd, url, response.status)
+                else:
+                    _LOGGER.debug("Successfully set %s on %s", self._cmd, url)
+                    await asyncio.sleep(2)  # Wait for the device to process new state
+                    await self.coordinator.async_request_refresh()
+
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout while setting %s on %s", self._cmd, url)
+        except ClientError as err:
+            _LOGGER.warning("Client error while setting %s on %s: %s", self._cmd, url, err)
+        except Exception as err:
+            _LOGGER.exception("Unexpected error setting %s on %s: %s", self._cmd, url, err)
 
     @property
     def extra_state_attributes(self):

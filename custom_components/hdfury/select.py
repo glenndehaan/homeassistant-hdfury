@@ -1,11 +1,12 @@
 import asyncio
 import logging
 
-import aiohttp
+from aiohttp import ClientError
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -109,18 +110,23 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
 
         # Construct combined URL (both TX inputs in same command)
         url = get_cmd_url(self.coordinator.host, "insel", f"{tx0_raw}%20{tx1_raw}")
+        session = async_get_clientsession(self.hass)
 
         _LOGGER.debug("Sending combined insel command: %s", url)
 
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url, timeout=5) as response:
-                    if response.status != 200:
-                        _LOGGER.warning(
-                            "Failed to switch input: %s (%s)", url, response.status
-                        )
-            except Exception as e:
-                _LOGGER.error("Error switching input: %s", e)
+        try:
+            async with session.get(url, timeout=10) as response:
+                if response.status != 200:
+                    _LOGGER.warning("Failed to switch input on %s (HTTP %s)", url, response.status)
+                else:
+                    _LOGGER.debug("Successfully switched input via %s", url)
+
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout while switching input on %s", url)
+        except ClientError as err:
+            _LOGGER.warning("Client error while switching input on %s: %s", url, err)
+        except Exception as err:
+            _LOGGER.exception("Unexpected error while switching input on %s: %s", url, err)
 
         # Wait for the device to process new state
         await asyncio.sleep(2)
@@ -171,14 +177,23 @@ class HDFuryOpModeSelect(CoordinatorEntity, SelectEntity):
 
         # Send command to device
         url = get_cmd_url(self.coordinator.host, "opmode", raw_value)
+        session = async_get_clientsession(self.hass)
 
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url, timeout=5) as response:
-                    if response.status != 200:
-                        _LOGGER.warning("Failed to set opmode: %s (%s)", url, response.status)
-            except Exception as e:
-                _LOGGER.error("Error setting opmode: %s", e)
+        _LOGGER.debug("Sending opmode command: %s", url)
+
+        try:
+            async with session.get(url, timeout=10) as response:
+                if response.status != 200:
+                    _LOGGER.warning("Failed to set opmode on %s (HTTP %s)", url, response.status)
+                else:
+                    _LOGGER.debug("Successfully set opmode on %s", url)
+
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout while setting opmode on %s", url)
+        except ClientError as err:
+            _LOGGER.warning("Client error while setting opmode on %s: %s", url, err)
+        except Exception as err:
+            _LOGGER.exception("Unexpected error setting opmode on %s: %s", url, err)
 
         # Wait for the device to process new state
         await asyncio.sleep(2)

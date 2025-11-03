@@ -1,12 +1,18 @@
+import asyncio
+import logging
+
 import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
 from .helpers import get_info_url
 from .options_flow import HDFuryOptionsFlow
+
+_LOGGER = logging.getLogger(__name__)
 
 class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle Config Flow for HDFury."""
@@ -46,12 +52,21 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Try to fetch data to confirm it's a valid HDFury device."""
 
         url = get_info_url(host)
+        session = async_get_clientsession(self.hass)
+
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=5) as resp:
-                    return resp.status == 200
-        except Exception:
-            return False
+            async with session.get(url, timeout=10) as resp:
+                if resp.status == 200:
+                    return True
+                _LOGGER.warning("Unexpected response from %s: HTTP %s", host, resp.status)
+                return False
+        except aiohttp.ClientError as err:
+            _LOGGER.error("Client error while validating connection to %s: %s", host, err)
+        except asyncio.TimeoutError:
+            _LOGGER.error("Timeout while connecting to %s", host)
+        except Exception as err:  # Catch-all for other exceptions
+            _LOGGER.exception("Unexpected error validating connection to %s: %s", host, err)
+
         return False
 
     def async_get_options_flow(config_entry):

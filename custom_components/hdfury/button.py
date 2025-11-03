@@ -1,4 +1,7 @@
+import asyncio
 import logging
+
+from aiohttp import ClientError
 
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
@@ -42,13 +45,24 @@ class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
         """Handle Button Press."""
 
         url = get_cmd_url(self.coordinator.host, "reboot")
+        session = async_get_clientsession(self.hass)
+
         _LOGGER.debug("Sending reboot command to HDFury: %s", url)
 
-        async with async_get_clientsession(self.hass).get(url) as response:
-            if response.status == 200:
-                _LOGGER.info("Reboot command sent successfully")
-            else:
-                _LOGGER.error("Failed to reboot HDFury device: %s", await response.text())
+        try:
+            async with session.get(url, timeout=10) as response:
+                if response.status == 200:
+                    _LOGGER.info("Reboot command sent successfully to %s", url)
+                else:
+                    body = await response.text()
+                    _LOGGER.error("Failed to reboot HDFury device (%s): %s", response.status, body)
+
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout while sending reboot command to %s", url)
+        except ClientError as err:
+            _LOGGER.warning("Client error while sending reboot command to %s: %s", url, err)
+        except Exception as err:
+            _LOGGER.exception("Unexpected error while sending reboot command to %s: %s", url, err)
 
 class HDFuryIssueHotplugButton(CoordinatorEntity, ButtonEntity):
     """HDFury Issue Hotplug Button Class."""
@@ -67,10 +81,21 @@ class HDFuryIssueHotplugButton(CoordinatorEntity, ButtonEntity):
         """Handle Button Press."""
 
         url = get_cmd_url(self.coordinator.host, "hotplug")
+        session = async_get_clientsession(self.hass)
+
         _LOGGER.debug("Sending hotplug command to HDFury: %s", url)
 
-        async with async_get_clientsession(self.hass).get(url) as response:
-            if response.status == 200:
-                _LOGGER.info("Hotplug command sent successfully")
-            else:
-                _LOGGER.error("Failed to hotplug HDFury device: %s", await response.text())
+        try:
+            async with session.get(url, timeout=10) as response:
+                if response.status == 200:
+                    _LOGGER.info("Hotplug command sent successfully to %s", url)
+                else:
+                    body = await response.text()
+                    _LOGGER.error("Failed to hotplug HDFury device (%s): %s", response.status, body)
+
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout while sending hotplug command to %s", url)
+        except ClientError as err:
+            _LOGGER.warning("Client error while sending hotplug command to %s: %s", url, err)
+        except Exception as err:
+            _LOGGER.exception("Unexpected error while sending hotplug command to %s: %s", url, err)

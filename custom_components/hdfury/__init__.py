@@ -43,12 +43,12 @@ class HDFuryCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Poll HDFury Data."""
 
-        data = await fetch_json(get_info_url(self.host))
+        data = await fetch_json(self.hass, get_info_url(self.host))
         if not data:
             raise UpdateFailed("Failed to fetch infopage.ssi")
 
         # Also update confinfo on every poll
-        conf_data = await fetch_json(get_conf_url(self.host))
+        conf_data = await fetch_json(self.hass, get_conf_url(self.host))
         if conf_data:
             self.confinfo = conf_data
         else:
@@ -62,12 +62,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {})
 
     host = entry.data["host"]
-    brdinfo = await fetch_json(get_brd_url(host))
+    brdinfo = await fetch_json(hass, get_brd_url(host))
     if not brdinfo:
         _LOGGER.error("Failed to fetch board info from %s", host)
         return False
 
-    confinfo = await fetch_json(get_conf_url(host))
+    confinfo = await fetch_json(hass, get_conf_url(host))
     if not confinfo:
         _LOGGER.error("Failed to fetch config info from %s", host)
         return False
