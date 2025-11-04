@@ -25,7 +25,7 @@ class HDFuryEntity(CoordinatorEntity[HDFuryCoordinator]):
 
         self._attr_name = name
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
-        self._attr_translation_key = key
+        self._attr_translation_key = key.lower()
         self._attr_has_entity_name = True
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.brdinfo["serial"])},

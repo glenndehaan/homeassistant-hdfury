@@ -20,46 +20,46 @@
       }
     },
     "sensor": {
-      "AUD0": {
+      "aud0": {
         "default": "mdi:audio-input-rca"
       },
-      "AUD1": {
+      "aud1": {
         "default": "mdi:audio-input-rca"
       },
-      "AUDOUT": {
+      "audout": {
         "default": "mdi:television-speaker"
       },
-      "EARCRX": {
+      "earcrx": {
         "default": "mdi:audio-video"
       },
-      "EDIDA0": {
+      "edida0": {
         "default": "mdi:format-list-text"
       },
-      "EDIDA1": {
+      "edida1": {
         "default": "mdi:format-list-text"
       },
-      "EDIDA2": {
+      "edida2": {
         "default": "mdi:format-list-text"
       },
-      "RX0": {
+      "rx0": {
         "default": "mdi:video-input-hdmi"
       },
-      "RX1": {
+      "rx1": {
         "default": "mdi:video-input-hdmi"
       },
-      "SINK0": {
+      "sink0": {
         "default": "mdi:television"
       },
-      "SINK1": {
+      "sink1": {
         "default": "mdi:television"
       },
-      "SINK2": {
+      "sink2": {
         "default": "mdi:audio-video"
       },
-      "TX0": {
+      "tx0": {
         "default": "mdi:cable-data"
       },
-      "TX1": {
+      "tx1": {
         "default": "mdi:cable-data"
       }
     },
