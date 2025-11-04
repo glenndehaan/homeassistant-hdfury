@@ -11,10 +11,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
+from .entity import HDFuryEntity
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,21 +28,23 @@ async def async_setup_entry(
 
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    async_add_entities([HDFuryRebootButton(coordinator), HDFuryIssueHotplugButton(coordinator)], True)
+    async_add_entities(
+        [
+            HDFuryRebootButton(coordinator, "reboot", "Reboot"),
+            HDFuryIssueHotplugButton(coordinator, "issue_hotplug", "Issue Hotplug"),
+        ],
+        True,
+    )
 
-class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
+class HDFuryRebootButton(HDFuryEntity, ButtonEntity):
     """HDFury Reset Button Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str):
         """Register Button."""
 
-        super().__init__(coordinator)
-        self._attr_has_entity_name = True
-        self._attr_name = "Reboot"
-        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_reboot"
-        self._attr_device_info = coordinator.device_info
+        super().__init__(coordinator, key, name)
+
         self._attr_entity_category = EntityCategory.CONFIG
-        self._attr_icon = "mdi:restart"
 
     async def async_press(self):
         """Handle Button Press."""
@@ -67,19 +69,15 @@ class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
         except Exception as err:
             _LOGGER.exception("Unexpected error while sending reboot command to %s: %s", url, err)
 
-class HDFuryIssueHotplugButton(CoordinatorEntity, ButtonEntity):
+class HDFuryIssueHotplugButton(HDFuryEntity, ButtonEntity):
     """HDFury Issue Hotplug Button Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str):
         """Register Button."""
 
-        super().__init__(coordinator)
-        self._attr_has_entity_name = True
-        self._attr_name = "Issue Hotplug"
-        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_issue_hotplug"
-        self._attr_device_info = coordinator.device_info
+        super().__init__(coordinator, key, name)
+
         self._attr_entity_category = EntityCategory.CONFIG
-        self._attr_icon = "mdi:restart"
 
     async def async_press(self):
         """Handle Button Press."""

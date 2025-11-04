@@ -10,10 +10,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_MAP
 from .coordinator import HDFuryCoordinator
+from .entity import HDFuryEntity
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ async def async_setup_entry(
     custom_labels = config_entry.options.get("option_labels", {})
 
     entities = []
-    for key, (name, icon) in SELECT_MAP.items():
+    for key, (name) in SELECT_MAP.items():
         if key in coordinator.data:
             tx_index = 0 if "0" in key else 1
             copy_label = f"Copy TX{1 - tx_index}"
@@ -44,32 +44,26 @@ async def async_setup_entry(
             reverse_label_map = {v: k for k, v in label_map.items()}
 
             entities.append(HDFuryPortSelect(
-                coordinator, key, name, icon, label_map, reverse_label_map
+                coordinator, key, name, label_map, reverse_label_map
             ))
 
     # Add OPMODE select if present
     if "opmode" in coordinator.data:
-        entities.append(HDFuryOpModeSelect(coordinator))
+        entities.append(HDFuryOpModeSelect(coordinator, "opmode", "Operation Mode"))
 
     async_add_entities(entities, True)
 
-class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
+class HDFuryPortSelect(HDFuryEntity, SelectEntity):
     """Class to handle fetching and storing HDFury Port Select data."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, icon: str, label_map: dict[str, str], reverse_map: dict[str, str]):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, label_map: dict[str, str], reverse_map: dict[str, str]):
         """Register Select."""
 
-        super().__init__(coordinator)
-        self._key = key
+        super().__init__(coordinator, key, name)
         self._label_map = label_map          # Maps raw values to user-friendly labels
         self._reverse_map = reverse_map      # Maps labels back to raw values
         self._raw_value = None
 
-        self._attr_has_entity_name = True
-        self._attr_name = name
-        self._attr_icon = icon
-        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
-        self._attr_device_info = coordinator.device_info
         self._attr_options = list(label_map.values())
 
     @property
@@ -136,20 +130,14 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
         # Trigger HA state refresh
         await self.coordinator.async_request_refresh()
 
-class HDFuryOpModeSelect(CoordinatorEntity, SelectEntity):
+class HDFuryOpModeSelect(HDFuryEntity, SelectEntity):
     """Handle operation mode selection (opmode)."""
 
-    def __init__(self, coordinator: HDFuryCoordinator):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str):
         """Initialize OpMode select entity."""
 
-        super().__init__(coordinator)
-        self._key = "opmode"
+        super().__init__(coordinator, key, name)
 
-        self._attr_has_entity_name = True
-        self._attr_name = "Operation Mode"
-        self._attr_icon = "mdi:cogs"
-        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_opmode"
-        self._attr_device_info = coordinator.device_info
         self._attr_options = list(OPMODE_OPTIONS.values())
 
         # Build reverse lookup for command sending

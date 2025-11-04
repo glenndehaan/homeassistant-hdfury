@@ -11,10 +11,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, SWITCH_MAP
 from .coordinator import HDFuryCoordinator
+from .entity import HDFuryEntity
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,26 +29,20 @@ async def async_setup_entry(
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = []
-    for key, (name, cmd, icon, category) in SWITCH_MAP.items():
+    for key, (name, cmd, category) in SWITCH_MAP.items():
         if key in coordinator.confinfo:
-            entities.append(HDFurySwitch(coordinator, key, name, cmd, icon, category))
+            entities.append(HDFurySwitch(coordinator, key, name, cmd, category))
 
     async_add_entities(entities, True)
 
-class HDFurySwitch(CoordinatorEntity, SwitchEntity):
+class HDFurySwitch(HDFuryEntity, SwitchEntity):
     """Base HDFury Switch Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, cmd: str, icon: str, category: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, cmd: str, category: str):
         """Register Switch."""
 
-        super().__init__(coordinator)
-        self._key = key
+        super().__init__(coordinator, key, name)
         self._cmd = cmd
-        self._attr_has_entity_name = True
-        self._attr_name = name
-        self._attr_icon = icon
-        self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
-        self._attr_device_info = coordinator.device_info
         if category == "configuration":
             self._attr_entity_category = EntityCategory.CONFIG
 

@@ -1,0 +1,99 @@
+{
+  "entity": {
+    "button": {
+      "issue_hotplug": {
+        "default": "mdi:restart"
+      },
+      "reboot": {
+        "default": "mdi:restart"
+      }
+    },
+    "select": {
+      "opmode": {
+        "default": "mdi:cogs"
+      },
+      "portseltx0": {
+        "default": "mdi:hdmi-port"
+      },
+      "portseltx1": {
+        "default": "mdi:hdmi-port"
+      }
+    },
+    "sensor": {
+      "AUD0": {
+        "default": "mdi:audio-input-rca"
+      },
+      "AUD1": {
+        "default": "mdi:audio-input-rca"
+      },
+      "AUDOUT": {
+        "default": "mdi:television-speaker"
+      },
+      "EARCRX": {
+        "default": "mdi:audio-video"
+      },
+      "EDIDA0": {
+        "default": "mdi:format-list-text"
+      },
+      "EDIDA1": {
+        "default": "mdi:format-list-text"
+      },
+      "EDIDA2": {
+        "default": "mdi:format-list-text"
+      },
+      "RX0": {
+        "default": "mdi:video-input-hdmi"
+      },
+      "RX1": {
+        "default": "mdi:video-input-hdmi"
+      },
+      "SINK0": {
+        "default": "mdi:television"
+      },
+      "SINK1": {
+        "default": "mdi:television"
+      },
+      "SINK2": {
+        "default": "mdi:audio-video"
+      },
+      "TX0": {
+        "default": "mdi:cable-data"
+      },
+      "TX1": {
+        "default": "mdi:cable-data"
+      }
+    },
+    "switch": {
+      "autosw": {
+        "default": "mdi:import"
+      },
+      "htpcmode0": {
+        "default": "mdi:desktop-classic"
+      },
+      "htpcmode1": {
+        "default": "mdi:desktop-classic"
+      },
+      "htpcmode2": {
+        "default": "mdi:desktop-classic"
+      },
+      "htpcmode3": {
+        "default": "mdi:desktop-classic"
+      },
+      "iractive": {
+        "default": "mdi:remote"
+      },
+      "mutetx0": {
+        "default": "mdi:volume-mute"
+      },
+      "mutetx1": {
+        "default": "mdi:volume-mute"
+      },
+      "oled": {
+        "default": "mdi:cellphone-information"
+      },
+      "relay": {
+        "default": "mdi:electric-switch"
+      }
+    }
+  }
+}
