@@ -1,3 +1,5 @@
+"""DataUpdateCoordinator for HDFury Integration."""
+
 from datetime import timedelta
 import logging
 
@@ -44,12 +46,12 @@ class HDFuryCoordinator(DataUpdateCoordinator):
 
         data = await fetch_json(self.hass, get_info_url(self.host))
         if not data:
-            raise UpdateFailed("Failed to fetch infopage.ssi")
+            raise UpdateFailed(f"Failed to fetch info page from {self.host}")
 
         conf_data = await fetch_json(self.hass, get_conf_url(self.host))
         if conf_data:
             self.confinfo = conf_data
         else:
-            _LOGGER.warning("Failed to fetch confinfo.ssi; retaining previous confinfo")
+            _LOGGER.warning("Failed to fetch config info; retaining previous data")
 
         return data

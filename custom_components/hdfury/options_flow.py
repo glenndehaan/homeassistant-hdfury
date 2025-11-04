@@ -1,16 +1,11 @@
 import voluptuous as vol
 
-from homeassistant import config_entries
+from homeassistant.config_entries import OptionsFlowWithReload
 
 from .const import INPUT_LABELS
 
-class HDFuryOptionsFlow(config_entries.OptionsFlow):
+class HDFuryOptionsFlow(OptionsFlowWithReload):
     """Handle Options Flow for HDFury."""
-
-    def __init__(self, config_entry):
-        """Register Options Flow."""
-
-        super().__init__()
 
     async def async_step_init(self, user_input=None):
         """Handle Options."""

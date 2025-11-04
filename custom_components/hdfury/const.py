@@ -1,3 +1,5 @@
+"""Constants for HDFury Integration."""
+
 DOMAIN = "hdfury"
 PLATFORMS = ["button", "select", "sensor", "switch"]
 

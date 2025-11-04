@@ -1,3 +1,5 @@
+"""Config flow for HDFury Integration."""
+
 import asyncio
 import logging
 
@@ -72,4 +74,4 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry):
         """Register Options Flow for HDFury."""
 
-        return HDFuryOptionsFlow(config_entry)
+        return HDFuryOptionsFlow()

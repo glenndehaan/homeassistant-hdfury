@@ -1,3 +1,5 @@
+"""Helpers for HDFury Integration."""
+
 import asyncio
 import json
 import logging

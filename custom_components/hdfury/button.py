@@ -1,3 +1,5 @@
+"""Button platform for HDFury Integration."""
+
 import asyncio
 import logging
 
@@ -35,7 +37,8 @@ class HDFuryRebootButton(CoordinatorEntity, ButtonEntity):
         """Register Button."""
 
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.device_name} Reboot"
+        self._attr_has_entity_name = True
+        self._attr_name = "Reboot"
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_reboot"
         self._attr_device_info = coordinator.device_info
         self._attr_entity_category = EntityCategory.CONFIG
@@ -71,7 +74,8 @@ class HDFuryIssueHotplugButton(CoordinatorEntity, ButtonEntity):
         """Register Button."""
 
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.device_name} Issue Hotplug"
+        self._attr_has_entity_name = True
+        self._attr_name = "Issue Hotplug"
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_issue_hotplug"
         self._attr_device_info = coordinator.device_info
         self._attr_entity_category = EntityCategory.CONFIG

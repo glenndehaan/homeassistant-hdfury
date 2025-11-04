@@ -1,3 +1,5 @@
+"""Sensor platform for HDFury Integration."""
+
 import logging
 
 from homeassistant.components.sensor import SensorEntity
@@ -36,7 +38,9 @@ class HDFurySensor(CoordinatorEntity, SensorEntity):
 
         super().__init__(coordinator)
         self._key = key
-        self._attr_name = f"{coordinator.device_name} {name}"
+
+        self._attr_has_entity_name = True
+        self._attr_name = name
         self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
         self._attr_device_info = coordinator.device_info

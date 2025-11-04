@@ -1,3 +1,5 @@
+"""Select platform for HDFury Integration."""
+
 import asyncio
 import logging
 
@@ -63,7 +65,8 @@ class HDFuryPortSelect(CoordinatorEntity, SelectEntity):
         self._reverse_map = reverse_map      # Maps labels back to raw values
         self._raw_value = None
 
-        self._attr_name = f"{coordinator.device_name} {name}"
+        self._attr_has_entity_name = True
+        self._attr_name = name
         self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_{key}"
         self._attr_device_info = coordinator.device_info
@@ -138,10 +141,12 @@ class HDFuryOpModeSelect(CoordinatorEntity, SelectEntity):
 
     def __init__(self, coordinator: HDFuryCoordinator):
         """Initialize OpMode select entity."""
-        super().__init__(coordinator)
 
+        super().__init__(coordinator)
         self._key = "opmode"
-        self._attr_name = f"{coordinator.device_name} Operation Mode"
+
+        self._attr_has_entity_name = True
+        self._attr_name = "Operation Mode"
         self._attr_icon = "mdi:cogs"
         self._attr_unique_id = f"{coordinator.brdinfo['serial']}_opmode"
         self._attr_device_info = coordinator.device_info
@@ -154,6 +159,7 @@ class HDFuryOpModeSelect(CoordinatorEntity, SelectEntity):
     @property
     def current_option(self):
         """Return the current operation mode."""
+
         raw_value = self.coordinator.data.get(self._key)
         self._raw_value = raw_value
         return OPMODE_OPTIONS.get(raw_value, f"Unknown ({raw_value})")
@@ -161,12 +167,14 @@ class HDFuryOpModeSelect(CoordinatorEntity, SelectEntity):
     @property
     def extra_state_attributes(self):
         """Expose raw value for debugging."""
+
         return {
             "raw_value": self._raw_value
         }
 
     async def async_select_option(self, option: str):
         """Change the operation mode."""
+
         raw_value = self._reverse_map.get(option)
         if raw_value is None:
             _LOGGER.warning("Invalid opmode selected: %s", option)
