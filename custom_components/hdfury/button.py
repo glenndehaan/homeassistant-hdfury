@@ -30,8 +30,8 @@ async def async_setup_entry(
 
     async_add_entities(
         [
-            HDFuryRebootButton(coordinator, "reboot", "Reboot"),
-            HDFuryIssueHotplugButton(coordinator, "issue_hotplug", "Issue Hotplug"),
+            HDFuryRebootButton(coordinator, "reboot"),
+            HDFuryIssueHotplugButton(coordinator, "issue_hotplug"),
         ],
         True,
     )
@@ -39,10 +39,10 @@ async def async_setup_entry(
 class HDFuryRebootButton(HDFuryEntity, ButtonEntity):
     """HDFury Reset Button Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str):
         """Register Button."""
 
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key)
 
         self._attr_entity_category = EntityCategory.CONFIG
 
@@ -72,10 +72,10 @@ class HDFuryRebootButton(HDFuryEntity, ButtonEntity):
 class HDFuryIssueHotplugButton(HDFuryEntity, ButtonEntity):
     """HDFury Issue Hotplug Button Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str):
         """Register Button."""
 
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key)
 
         self._attr_entity_category = EntityCategory.CONFIG
 

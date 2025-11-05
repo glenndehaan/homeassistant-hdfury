@@ -15,11 +15,6 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][entry.entry_id]
 
-    data: dict[str, Any] = {
-        "brdinfo": async_redact_data(coordinator.brdinfo, ["ipaddress", "serial"]),
-        "confinfo": async_redact_data(
-            coordinator.confinfo, ["staticip", "activeip", "macaddr"]
-        ),
-        "data": coordinator.data,
-    }
-    return data
+    return async_redact_data(
+        coordinator.data, ["ipaddress", "serial", "staticip", "activeip", "macaddr"]
+    )

@@ -29,28 +29,28 @@ async def async_setup_entry(
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = []
-    for key, (name, cmd, category) in SWITCH_MAP.items():
-        if key in coordinator.confinfo:
-            entities.append(HDFurySwitch(coordinator, key, name, cmd, category))
+    for key, (cmd) in SWITCH_MAP.items():
+        if key in coordinator.data["config"]:
+            entities.append(HDFurySwitch(coordinator, key, cmd))
 
     async_add_entities(entities, True)
 
 class HDFurySwitch(HDFuryEntity, SwitchEntity):
     """Base HDFury Switch Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, cmd: str, category: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, cmd: str):
         """Register Switch."""
 
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key)
+
         self._cmd = cmd
-        if category == "configuration":
-            self._attr_entity_category = EntityCategory.CONFIG
+        self._attr_entity_category = EntityCategory.CONFIG
 
     @property
     def is_on(self):
         """Set Switch State."""
 
-        return self.coordinator.confinfo.get(self._key) in ["1", "on", "true"]
+        return self.coordinator.data["config"].get(self._key) in ["1", "on", "true"]
 
     async def async_turn_on(self, **kwargs):
         """Handle Switch On Event."""
@@ -105,5 +105,5 @@ class HDFurySwitch(HDFuryEntity, SwitchEntity):
         """Set Select State Attributes."""
 
         return {
-            "raw_value": self.coordinator.confinfo.get(self._key)
+            "raw_value": self.coordinator.data["config"].get(self._key)
         }

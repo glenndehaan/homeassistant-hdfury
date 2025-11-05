@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_MAP
+from .const import DOMAIN, INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_LIST
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 from .helpers import get_cmd_url
@@ -31,8 +31,8 @@ async def async_setup_entry(
     custom_labels = config_entry.options.get("option_labels", {})
 
     entities = []
-    for key, (name) in SELECT_MAP.items():
-        if key in coordinator.data:
+    for key in SELECT_LIST:
+        if key in coordinator.data["info"]:
             tx_index = 0 if "0" in key else 1
             copy_label = f"Copy TX{1 - tx_index}"
 
@@ -44,22 +44,22 @@ async def async_setup_entry(
             reverse_label_map = {v: k for k, v in label_map.items()}
 
             entities.append(HDFuryPortSelect(
-                coordinator, key, name, label_map, reverse_label_map
+                coordinator, key, label_map, reverse_label_map
             ))
 
     # Add OPMODE select if present
-    if "opmode" in coordinator.data:
-        entities.append(HDFuryOpModeSelect(coordinator, "opmode", "Operation Mode"))
+    if "opmode" in coordinator.data["info"]:
+        entities.append(HDFuryOpModeSelect(coordinator, "opmode"))
 
     async_add_entities(entities, True)
 
 class HDFuryPortSelect(HDFuryEntity, SelectEntity):
     """Class to handle fetching and storing HDFury Port Select data."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, label_map: dict[str, str], reverse_map: dict[str, str]):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, label_map: dict[str, str], reverse_map: dict[str, str]):
         """Register Select."""
 
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key)
         self._label_map = label_map          # Maps raw values to user-friendly labels
         self._reverse_map = reverse_map      # Maps labels back to raw values
         self._raw_value = None
@@ -70,7 +70,7 @@ class HDFuryPortSelect(HDFuryEntity, SelectEntity):
     def current_option(self):
         """Set Current Select Option."""
 
-        raw_value = self.coordinator.data.get(self._key)
+        raw_value = self.coordinator.data["info"].get(self._key)
         self._raw_value = raw_value
         return self._label_map.get(raw_value, f"Unknown ({raw_value})")
 
@@ -94,11 +94,11 @@ class HDFuryPortSelect(HDFuryEntity, SelectEntity):
         _LOGGER.debug("Setting %s to %s", self._key, raw_value)
 
         # Update local data first
-        self.coordinator.data[self._key] = raw_value
+        self.coordinator.data["info"][self._key] = raw_value
 
         # --- Remap both TX0 and TX1 current selections ---
-        tx0_raw = self.coordinator.data.get("portseltx0")
-        tx1_raw = self.coordinator.data.get("portseltx1")
+        tx0_raw = self.coordinator.data["info"].get("portseltx0")
+        tx1_raw = self.coordinator.data["info"].get("portseltx1")
 
         # If either missing, skip to avoid incomplete updates
         if tx0_raw is None or tx1_raw is None:
@@ -133,10 +133,10 @@ class HDFuryPortSelect(HDFuryEntity, SelectEntity):
 class HDFuryOpModeSelect(HDFuryEntity, SelectEntity):
     """Handle operation mode selection (opmode)."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str):
         """Initialize OpMode select entity."""
 
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key)
 
         self._attr_options = list(OPMODE_OPTIONS.values())
 
@@ -148,7 +148,7 @@ class HDFuryOpModeSelect(HDFuryEntity, SelectEntity):
     def current_option(self):
         """Return the current operation mode."""
 
-        raw_value = self.coordinator.data.get(self._key)
+        raw_value = self.coordinator.data["info"].get(self._key)
         self._raw_value = raw_value
         return OPMODE_OPTIONS.get(raw_value, f"Unknown ({raw_value})")
 
@@ -169,7 +169,7 @@ class HDFuryOpModeSelect(HDFuryEntity, SelectEntity):
             return
 
         _LOGGER.debug("Setting operation mode to %s (%s)", option, raw_value)
-        self.coordinator.data[self._key] = raw_value
+        self.coordinator.data["info"][self._key] = raw_value
 
         # Send command to device
         url = get_cmd_url(self.coordinator.host, "opmode", raw_value)

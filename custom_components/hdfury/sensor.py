@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, SENSOR_MAP
+from .const import DOMAIN, SENSOR_LIST
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 
@@ -24,25 +24,24 @@ async def async_setup_entry(
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = []
-    for key, (name, category) in SENSOR_MAP.items():
-        if key in coordinator.data:
-            entities.append(HDFurySensor(coordinator, key, name, category))
+    for key in SENSOR_LIST:
+        if key in coordinator.data["info"]:
+            entities.append(HDFurySensor(coordinator, key))
 
     async_add_entities(entities, True)
 
 class HDFurySensor(HDFuryEntity, SensorEntity):
     """Base HDFury Sensor Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, name: str, category: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str):
         """Register Sensor."""
 
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key)
 
-        if category == "diagnostic":
-            self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self):
         """Set Sensor Value."""
 
-        return self.coordinator.data.get(self._key)
+        return self.coordinator.data["info"].get(self._key)
