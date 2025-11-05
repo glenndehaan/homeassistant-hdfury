@@ -2,11 +2,12 @@
 
 import asyncio
 import logging
+from typing import Any
 
 import aiohttp
 import voluptuous as vol
 
-from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -16,12 +17,15 @@ from .options_flow import HDFuryOptionsFlow
 
 _LOGGER = logging.getLogger(__name__)
 
-class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+
+class HDFuryConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle Config Flow for HDFury."""
 
     VERSION = 1
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(
+            self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         """Handle Initial Setup."""
 
         errors = {}
@@ -50,7 +54,7 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def _validate_connection(self, host):
+    async def _validate_connection(self, host: str) -> bool:
         """Try to fetch data to confirm it's a valid HDFury device."""
 
         url = get_info_url(host)
@@ -71,7 +75,8 @@ class HDFuryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return False
 
-    def async_get_options_flow(config_entry):
+    @staticmethod
+    def async_get_options_flow(config_entry: ConfigEntry) -> HDFuryOptionsFlow:
         """Register Options Flow for HDFury."""
 
         return HDFuryOptionsFlow()

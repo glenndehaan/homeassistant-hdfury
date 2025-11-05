@@ -2,7 +2,10 @@
 
 from datetime import timedelta
 import logging
+from typing import Any
 
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -11,10 +14,11 @@ from .helpers import fetch_json, get_brd_url, get_conf_url, get_info_url
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class HDFuryCoordinator(DataUpdateCoordinator):
     """HDFury Device Coordinator Class."""
 
-    def __init__(self, hass: HomeAssistant, host: str):
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize the coordinator."""
 
         super().__init__(
@@ -23,14 +27,14 @@ class HDFuryCoordinator(DataUpdateCoordinator):
             name="HDFury",
             update_interval=timedelta(seconds=30),
         )
-        self.host = host
+        self.host = entry.data[CONF_HOST]
         self.data = {
             "board": {},
             "info": {},
             "config": {},
         }
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> dict[str, Any]:
         """Fetch the latest device data."""
 
         board = await fetch_json(self.hass, get_brd_url(self.host))

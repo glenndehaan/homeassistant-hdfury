@@ -12,21 +12,21 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
         hass: HomeAssistant,
-        config_entry: ConfigEntry,
+        entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
-):
+) -> None:
     """Set up buttons using the platform schema."""
 
-    coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: HDFuryCoordinator = entry.runtime_data
 
     async_add_entities(
         [
@@ -36,10 +36,11 @@ async def async_setup_entry(
         True,
     )
 
+
 class HDFuryRebootButton(HDFuryEntity, ButtonEntity):
     """HDFury Reset Button Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str) -> None:
         """Register Button."""
 
         super().__init__(coordinator, key)
@@ -69,10 +70,11 @@ class HDFuryRebootButton(HDFuryEntity, ButtonEntity):
         except Exception as err:
             _LOGGER.exception("Unexpected error while sending reboot command to %s: %s", url, err)
 
+
 class HDFuryIssueHotplugButton(HDFuryEntity, ButtonEntity):
     """HDFury Issue Hotplug Button Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str) -> None:
         """Register Button."""
 
         super().__init__(coordinator, key)

@@ -12,21 +12,22 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, SWITCH_MAP
+from .const import SWITCH_MAP
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
         hass: HomeAssistant,
-        config_entry: ConfigEntry,
+        entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
-):
+) -> None:
     """Set up switches using the platform schema."""
 
-    coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: HDFuryCoordinator = entry.runtime_data
 
     entities = []
     for key, (cmd) in SWITCH_MAP.items():
@@ -35,10 +36,11 @@ async def async_setup_entry(
 
     async_add_entities(entities, True)
 
+
 class HDFurySwitch(HDFuryEntity, SwitchEntity):
     """Base HDFury Switch Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, cmd: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, cmd: str) -> None:
         """Register Switch."""
 
         super().__init__(coordinator, key)

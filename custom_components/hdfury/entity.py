@@ -1,12 +1,13 @@
 """Base class for HDFury entities."""
 
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
 from .helpers import get_base_url
+
 
 class HDFuryEntity(CoordinatorEntity[HDFuryCoordinator]):
     """Common elements for all entities."""

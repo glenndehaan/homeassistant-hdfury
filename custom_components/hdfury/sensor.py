@@ -8,20 +8,21 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, SENSOR_LIST
+from .const import SENSOR_LIST
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
         hass: HomeAssistant,
-        config_entry: ConfigEntry,
+        entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
-):
+) -> None:
     """Set up buttons using the platform schema."""
 
-    coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: HDFuryCoordinator = entry.runtime_data
 
     entities = []
     for key in SENSOR_LIST:
@@ -30,10 +31,11 @@ async def async_setup_entry(
 
     async_add_entities(entities, True)
 
+
 class HDFurySensor(HDFuryEntity, SensorEntity):
     """Base HDFury Sensor Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str) -> None:
         """Register Sensor."""
 
         super().__init__(coordinator, key)

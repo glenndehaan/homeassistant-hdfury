@@ -11,24 +11,25 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_LIST
+from .const import INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_LIST
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 from .helpers import get_cmd_url
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
         hass: HomeAssistant,
-        config_entry: ConfigEntry,
+        entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
-):
+) -> None:
     """Set up selects using the platform schema."""
 
-    coordinator: HDFuryCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: HDFuryCoordinator = entry.runtime_data
 
     # Load custom labels if present
-    custom_labels = config_entry.options.get("option_labels", {})
+    custom_labels = entry.options.get("option_labels", {})
 
     entities = []
     for key in SELECT_LIST:
@@ -53,10 +54,11 @@ async def async_setup_entry(
 
     async_add_entities(entities, True)
 
+
 class HDFuryPortSelect(HDFuryEntity, SelectEntity):
     """Class to handle fetching and storing HDFury Port Select data."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, label_map: dict[str, str], reverse_map: dict[str, str]):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str, label_map: dict[str, str], reverse_map: dict[str, str]) -> None:
         """Register Select."""
 
         super().__init__(coordinator, key)
@@ -130,10 +132,11 @@ class HDFuryPortSelect(HDFuryEntity, SelectEntity):
         # Trigger HA state refresh
         await self.coordinator.async_request_refresh()
 
+
 class HDFuryOpModeSelect(HDFuryEntity, SelectEntity):
     """Handle operation mode selection (opmode)."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str):
+    def __init__(self, coordinator: HDFuryCoordinator, key: str) -> None:
         """Initialize OpMode select entity."""
 
         super().__init__(coordinator, key)

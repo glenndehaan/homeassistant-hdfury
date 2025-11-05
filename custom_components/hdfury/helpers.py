@@ -11,6 +11,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def fetch_json(hass: HomeAssistant, url: str):
     """Fetch JSON data from an HDFury device."""
 
@@ -41,25 +42,30 @@ async def fetch_json(hass: HomeAssistant, url: str):
 
     return {}
 
+
 def get_base_url(host: str):
     """Return HDFury Device Base URL."""
 
     return f"http://{host}"
+
 
 def get_brd_url(host: str):
     """Return HDFury Device Board URL."""
 
     return f"{get_base_url(host)}/ssi/brdinfo.ssi"
 
+
 def get_conf_url(host: str):
     """Return HDFury Device Configuration URL."""
 
     return f"{get_base_url(host)}/ssi/confpage.ssi"
 
+
 def get_info_url(host: str):
     """Return HDFury Device Info URL."""
 
     return f"{get_base_url(host)}/ssi/infopage.ssi"
+
 
 def get_cmd_url(host: str, cmd: str, option: str = ""):
     """Return HDFury Command URL."""

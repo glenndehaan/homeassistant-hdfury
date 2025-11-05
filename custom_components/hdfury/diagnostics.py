@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
 
+
 async def async_get_config_entry_diagnostics(
         hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:

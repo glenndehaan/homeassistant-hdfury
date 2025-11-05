@@ -1,13 +1,20 @@
+"""Options flow for HDFury Integration."""
+
+from typing import Any
+
 import voluptuous as vol
 
-from homeassistant.config_entries import OptionsFlowWithReload
+from homeassistant.config_entries import ConfigFlowResult, OptionsFlowWithReload
 
 from .const import INPUT_LABELS
+
 
 class HDFuryOptionsFlow(OptionsFlowWithReload):
     """Handle Options Flow for HDFury."""
 
-    async def async_step_init(self, user_input=None):
+    async def async_step_init(
+            self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         """Handle Options."""
 
         if user_input is not None:
