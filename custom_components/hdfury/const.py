@@ -2,7 +2,7 @@
 
 DOMAIN = "hdfury"
 
-SELECT_LIST = [
+SELECT_PORT_LIST = [
     "portseltx0",
     "portseltx1",
 ]
@@ -25,16 +25,16 @@ SENSOR_LIST = [
 ]
 
 SWITCH_MAP = {
-    "autosw": "autosw",
-    "htpcmode0": "htpcmode0",
-    "htpcmode1": "htpcmode1",
-    "htpcmode2": "htpcmode2",
-    "htpcmode3": "htpcmode3",
-    "mutetx0": "mutetx0audio",
-    "mutetx1": "mutetx1audio",
-    "oled": "oled",
-    "iractive": "iractive",
-    "relay": "relay",
+    "autosw": lambda client, value: client.set_auto_switch_inputs(value),
+    "htpcmode0": lambda client, value: client.set_htpc_mode_rx0(value),
+    "htpcmode1": lambda client, value: client.set_htpc_mode_rx1(value),
+    "htpcmode2": lambda client, value: client.set_htpc_mode_rx2(value),
+    "htpcmode3": lambda client, value: client.set_htpc_mode_rx3(value),
+    "mutetx0": lambda client, value: client.set_mute_tx0_audio(value),
+    "mutetx1": lambda client, value: client.set_mute_tx1_audio(value),
+    "oled": lambda client, value: client.set_oled(value),
+    "iractive": lambda client, value: client.set_ir_active(value),
+    "relay": lambda client, value: client.set_relay(value),
 }
 
 INPUT_OPTIONS = {

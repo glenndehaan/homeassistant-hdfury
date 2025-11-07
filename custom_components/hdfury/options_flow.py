@@ -13,7 +13,7 @@ class HDFuryOptionsFlow(OptionsFlowWithReload):
     """Handle Options Flow for HDFury."""
 
     async def async_step_init(
-            self, user_input: dict[str, Any] | None = None
+        self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle Options."""
 

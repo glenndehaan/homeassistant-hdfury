@@ -11,7 +11,7 @@ from .coordinator import HDFuryCoordinator
 
 
 async def async_get_config_entry_diagnostics(
-        hass: HomeAssistant, entry: ConfigEntry
+    hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
     coordinator: HDFuryCoordinator = hass.data[DOMAIN][entry.entry_id]

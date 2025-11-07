@@ -1,18 +1,16 @@
 """Config flow for HDFury Integration."""
 
-import asyncio
 import logging
 from typing import Any
 
-import aiohttp
 import voluptuous as vol
 
+from hdfury import HDFuryAPI, HDFuryError
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
-from .helpers import get_info_url
 from .options_flow import HDFuryOptionsFlow
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,7 +22,7 @@ class HDFuryConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(
-            self, user_input: dict[str, Any] | None = None
+        self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle Initial Setup."""
 
@@ -39,8 +37,8 @@ class HDFuryConfigFlow(ConfigFlow, domain=DOMAIN):
                     errors["base"] = "already_configured"
                     break
 
+            # Proceed normally (And check connection)
             if not errors:
-                # Proceed normally
                 if await self._validate_connection(host):
                     return self.async_create_entry(
                         title=f"HDFury ({host})", data=user_input
@@ -57,23 +55,15 @@ class HDFuryConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _validate_connection(self, host: str) -> bool:
         """Try to fetch data to confirm it's a valid HDFury device."""
 
-        url = get_info_url(host)
-        session = async_get_clientsession(self.hass)
+        client: HDFuryAPI = HDFuryAPI(host, async_get_clientsession(self.hass))
 
         try:
-            async with session.get(url, timeout=10) as resp:
-                if resp.status == 200:
-                    return True
-                _LOGGER.warning("Unexpected response from %s: HTTP %s", host, resp.status)
-                return False
-        except aiohttp.ClientError as err:
-            _LOGGER.error("Client error while validating connection to %s: %s", host, err)
-        except asyncio.TimeoutError:
-            _LOGGER.error("Timeout while connecting to %s", host)
-        except Exception as err:  # Catch-all for other exceptions
-            _LOGGER.exception("Unexpected error validating connection to %s: %s", host, err)
+            await client.get_board()
+        except HDFuryError as error:
+            _LOGGER.error("%s", error)
+            return False
 
-        return False
+        return True
 
     @staticmethod
     def async_get_options_flow(config_entry: ConfigEntry) -> HDFuryOptionsFlow:

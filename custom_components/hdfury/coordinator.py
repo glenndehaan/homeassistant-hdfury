@@ -4,13 +4,14 @@ from datetime import timedelta
 import logging
 from typing import Any
 
+from hdfury import HDFuryAPI, HDFuryError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN
-from .helpers import fetch_json, get_brd_url, get_conf_url, get_info_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,8 +28,9 @@ class HDFuryCoordinator(DataUpdateCoordinator):
             name="HDFury",
             update_interval=timedelta(seconds=30),
         )
-        self.host = entry.data[CONF_HOST]
-        self.data = {
+        self.host: str = entry.data[CONF_HOST]
+        self.client: HDFuryAPI = HDFuryAPI(self.host, async_get_clientsession(hass))
+        self.data: dict[str, Any] = {
             "board": {},
             "info": {},
             "config": {},
@@ -37,32 +39,16 @@ class HDFuryCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch the latest device data."""
 
-        board = await fetch_json(self.hass, get_brd_url(self.host))
-        if not board:
-            _LOGGER.error("Failed to fetch board info from %s", get_brd_url(self.host))
+        try:
+            board = await self.client.get_board()
+            info = await self.client.get_info()
+            config = await self.client.get_config()
+        except HDFuryError as error:
             raise UpdateFailed(
                 translation_domain=DOMAIN,
-                translation_key="connection_error",
-                translation_placeholders={"endpoint": str(get_brd_url(self.host))},
-            )
-
-        info = await fetch_json(self.hass, get_info_url(self.host))
-        if not info:
-            _LOGGER.error("Failed to fetch info page from %s", get_info_url(self.host))
-            raise UpdateFailed(
-                translation_domain=DOMAIN,
-                translation_key="connection_error",
-                translation_placeholders={"endpoint": str(get_info_url(self.host))},
-            )
-
-        config = await fetch_json(self.hass, get_conf_url(self.host))
-        if not config:
-            _LOGGER.error("Failed to fetch config info from %s", get_conf_url(self.host))
-            raise UpdateFailed(
-                translation_domain=DOMAIN,
-                translation_key="connection_error",
-                translation_placeholders={"endpoint": str(get_conf_url(self.host))},
-            )
+                translation_key="communication_error",
+                translation_placeholders={"error": str(error)},
+            ) from error
 
         return {
             "board": board,

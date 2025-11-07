@@ -1,28 +1,24 @@
 """Button platform for HDFury Integration."""
 
-import asyncio
-import logging
+from collections.abc import Awaitable, Callable
 
-from aiohttp import ClientError
-
+from hdfury import HDFuryAPI, HDFuryError
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
-from .helpers import get_cmd_url
-
-_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up buttons using the platform schema."""
 
@@ -30,76 +26,39 @@ async def async_setup_entry(
 
     async_add_entities(
         [
-            HDFuryRebootButton(coordinator, "reboot"),
-            HDFuryIssueHotplugButton(coordinator, "issue_hotplug"),
+            HDFuryButton(coordinator, "reboot", lambda client: client.issue_reboot()),
+            HDFuryButton(
+                coordinator, "issue_hotplug", lambda client: client.issue_hotplug()
+            ),
         ],
         True,
     )
 
 
-class HDFuryRebootButton(HDFuryEntity, ButtonEntity):
-    """HDFury Reset Button Class."""
+class HDFuryButton(HDFuryEntity, ButtonEntity):
+    """HDFury Button Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str) -> None:
+    def __init__(
+        self,
+        coordinator: HDFuryCoordinator,
+        key: str,
+        press_fn: Callable[[HDFuryAPI], Awaitable[None]],
+    ) -> None:
         """Register Button."""
 
         super().__init__(coordinator, key)
 
         self._attr_entity_category = EntityCategory.CONFIG
+        self.press_fn = press_fn
 
     async def async_press(self):
         """Handle Button Press."""
 
-        url = get_cmd_url(self.coordinator.host, "reboot")
-        session = async_get_clientsession(self.hass)
-
-        _LOGGER.debug("Sending reboot command to HDFury: %s", url)
-
         try:
-            async with session.get(url, timeout=10) as response:
-                if response.status == 200:
-                    _LOGGER.info("Reboot command sent successfully to %s", url)
-                else:
-                    body = await response.text()
-                    _LOGGER.error("Failed to reboot HDFury device (%s): %s", response.status, body)
-
-        except asyncio.TimeoutError:
-            _LOGGER.warning("Timeout while sending reboot command to %s", url)
-        except ClientError as err:
-            _LOGGER.warning("Client error while sending reboot command to %s: %s", url, err)
-        except Exception as err:
-            _LOGGER.exception("Unexpected error while sending reboot command to %s: %s", url, err)
-
-
-class HDFuryIssueHotplugButton(HDFuryEntity, ButtonEntity):
-    """HDFury Issue Hotplug Button Class."""
-
-    def __init__(self, coordinator: HDFuryCoordinator, key: str) -> None:
-        """Register Button."""
-
-        super().__init__(coordinator, key)
-
-        self._attr_entity_category = EntityCategory.CONFIG
-
-    async def async_press(self):
-        """Handle Button Press."""
-
-        url = get_cmd_url(self.coordinator.host, "hotplug")
-        session = async_get_clientsession(self.hass)
-
-        _LOGGER.debug("Sending hotplug command to HDFury: %s", url)
-
-        try:
-            async with session.get(url, timeout=10) as response:
-                if response.status == 200:
-                    _LOGGER.info("Hotplug command sent successfully to %s", url)
-                else:
-                    body = await response.text()
-                    _LOGGER.error("Failed to hotplug HDFury device (%s): %s", response.status, body)
-
-        except asyncio.TimeoutError:
-            _LOGGER.warning("Timeout while sending hotplug command to %s", url)
-        except ClientError as err:
-            _LOGGER.warning("Client error while sending hotplug command to %s: %s", url, err)
-        except Exception as err:
-            _LOGGER.exception("Unexpected error while sending hotplug command to %s: %s", url, err)
+            await self.press_fn(self.coordinator.client)
+        except HDFuryError as error:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="communication_error",
+                translation_placeholders={"error": str(error)},
+            ) from error

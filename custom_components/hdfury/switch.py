@@ -1,38 +1,34 @@
 """Switch platform for HDFury Integration."""
 
-import asyncio
-import logging
+from collections.abc import Awaitable, Callable
+from typing import Any
 
-from aiohttp import ClientError
-
+from hdfury import HDFuryAPI, HDFuryError
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import SWITCH_MAP
+from .const import DOMAIN, SWITCH_MAP
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
-from .helpers import get_cmd_url
-
-_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up switches using the platform schema."""
 
     coordinator: HDFuryCoordinator = entry.runtime_data
 
     entities = []
-    for key, (cmd) in SWITCH_MAP.items():
+    for key, (set_value_fn) in SWITCH_MAP.items():
         if key in coordinator.data["config"]:
-            entities.append(HDFurySwitch(coordinator, key, cmd))
+            entities.append(HDFurySwitch(coordinator, key, set_value_fn))
 
     async_add_entities(entities, True)
 
@@ -40,72 +36,57 @@ async def async_setup_entry(
 class HDFurySwitch(HDFuryEntity, SwitchEntity):
     """Base HDFury Switch Class."""
 
-    def __init__(self, coordinator: HDFuryCoordinator, key: str, cmd: str) -> None:
+    def __init__(
+        self,
+        coordinator: HDFuryCoordinator,
+        key: str,
+        set_value_fn: Callable[[HDFuryAPI], Awaitable[None]],
+    ) -> None:
         """Register Switch."""
 
         super().__init__(coordinator, key)
 
-        self._cmd = cmd
         self._attr_entity_category = EntityCategory.CONFIG
+        self.set_value_fn = set_value_fn
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Set Switch State."""
 
         return self.coordinator.data["config"].get(self._key) in ["1", "on", "true"]
 
-    async def async_turn_on(self, **kwargs):
+    async def async_turn_on(self, **kwargs: Any) -> None:
         """Handle Switch On Event."""
 
-        url = get_cmd_url(self.coordinator.host, self._cmd, "on")
-        session = async_get_clientsession(self.hass)
-
-        _LOGGER.debug("Sending %s command: %s", self._cmd, url)
-
         try:
-            async with session.get(url, timeout=10) as response:
-                if response.status != 200:
-                    _LOGGER.warning("Failed to set %s on %s (HTTP %s)", self._cmd, url, response.status)
-                else:
-                    _LOGGER.debug("Successfully set %s on %s", self._cmd, url)
-                    await asyncio.sleep(2)  # Wait for the device to process new state
-                    await self.coordinator.async_request_refresh()
+            await self.set_value_fn(self.coordinator.client, "on")
+        except HDFuryError as error:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="communication_error",
+                translation_placeholders={"error": str(error)},
+            ) from error
 
-        except asyncio.TimeoutError:
-            _LOGGER.warning("Timeout while setting %s on %s", self._cmd, url)
-        except ClientError as err:
-            _LOGGER.warning("Client error while setting %s on %s: %s", self._cmd, url, err)
-        except Exception as err:
-            _LOGGER.exception("Unexpected error setting %s on %s: %s", self._cmd, url, err)
+        # Trigger HA state refresh
+        await self.coordinator.async_request_refresh()
 
-    async def async_turn_off(self, **kwargs):
+    async def async_turn_off(self, **kwargs: Any) -> None:
         """Handle Switch Off Event."""
 
-        url = get_cmd_url(self.coordinator.host, self._cmd, "off")
-        session = async_get_clientsession(self.hass)
-
-        _LOGGER.debug("Sending %s command: %s", self._cmd, url)
-
         try:
-            async with session.get(url, timeout=10) as response:
-                if response.status != 200:
-                    _LOGGER.warning("Failed to set %s on %s (HTTP %s)", self._cmd, url, response.status)
-                else:
-                    _LOGGER.debug("Successfully set %s on %s", self._cmd, url)
-                    await asyncio.sleep(2)  # Wait for the device to process new state
-                    await self.coordinator.async_request_refresh()
+            await self.set_value_fn(self.coordinator.client, "off")
+        except HDFuryError as error:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="communication_error",
+                translation_placeholders={"error": str(error)},
+            ) from error
 
-        except asyncio.TimeoutError:
-            _LOGGER.warning("Timeout while setting %s on %s", self._cmd, url)
-        except ClientError as err:
-            _LOGGER.warning("Client error while setting %s on %s: %s", self._cmd, url, err)
-        except Exception as err:
-            _LOGGER.exception("Unexpected error setting %s on %s: %s", self._cmd, url, err)
+        # Trigger HA state refresh
+        await self.coordinator.async_request_refresh()
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Set Select State Attributes."""
 
-        return {
-            "raw_value": self.coordinator.data["config"].get(self._key)
-        }
+        return {"raw_value": self.coordinator.data["config"].get(self._key)}
