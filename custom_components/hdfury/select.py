@@ -1,13 +1,16 @@
 """Select platform for HDFury Integration."""
 
-from hdfury import HDFuryError
+from typing import Any
+
+from hdfury import OPERATION_MODES, HDFuryError
+
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import DOMAIN, INPUT_OPTIONS, OPMODE_OPTIONS, SELECT_PORT_LIST
+from .const import DOMAIN, INPUT_OPTIONS, SELECT_PORT_LIST
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 
@@ -15,7 +18,7 @@ from .entity import HDFuryEntity
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up selects using the platform schema."""
 
@@ -24,7 +27,7 @@ async def async_setup_entry(
     # Load custom labels if present
     custom_labels = entry.options.get("option_labels", {})
 
-    entities = []
+    entities: list[HDFuryEntity] = []
     for key in SELECT_PORT_LIST:
         if key in coordinator.data["info"]:
             tx_index = 0 if "0" in key else 1
@@ -64,7 +67,7 @@ class HDFuryPortSelect(HDFuryEntity, SelectEntity):
         self._reverse_map = {v: k for k, v in label_map.items()}
 
     @property
-    def current_option(self):
+    def current_option(self) -> str:
         """Set Current Select Option."""
 
         raw_value = self.coordinator.data["info"].get(self._key)
@@ -72,12 +75,12 @@ class HDFuryPortSelect(HDFuryEntity, SelectEntity):
         return self._label_map.get(raw_value, f"Unknown ({raw_value})")
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Set Select State Attributes."""
 
         return {"raw_value": self._raw_value}
 
-    async def async_select_option(self, option: str):
+    async def async_select_option(self, option: str) -> None:
         """Handle Port Select."""
 
         # Map user-friendly label back to raw input value
@@ -126,27 +129,27 @@ class HDFuryOpModeSelect(HDFuryEntity, SelectEntity):
 
         super().__init__(coordinator, key)
 
-        self._attr_options = list(OPMODE_OPTIONS.values())
+        self._attr_options = list(OPERATION_MODES.values())
         self._raw_value = None
 
         # Build reverse lookup for command sending
-        self._reverse_map = {v: k for k, v in OPMODE_OPTIONS.items()}
+        self._reverse_map = {v: k for k, v in OPERATION_MODES.items()}
 
     @property
-    def current_option(self):
+    def current_option(self) -> str:
         """Return the current operation mode."""
 
         raw_value = self.coordinator.data["info"].get(self._key)
         self._raw_value = raw_value
-        return OPMODE_OPTIONS.get(raw_value, f"Unknown ({raw_value})")
+        return OPERATION_MODES.get(raw_value, f"Unknown ({raw_value})")
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Expose raw value for debugging."""
 
         return {"raw_value": self._raw_value}
 
-    async def async_select_option(self, option: str):
+    async def async_select_option(self, option: str) -> None:
         """Change the operation mode."""
 
         # Map user-friendly label back to raw input value

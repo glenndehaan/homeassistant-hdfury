@@ -2,9 +2,9 @@
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import SENSOR_LIST
 from .coordinator import HDFuryCoordinator
@@ -14,13 +14,13 @@ from .entity import HDFuryEntity
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up buttons using the platform schema."""
 
     coordinator: HDFuryCoordinator = entry.runtime_data
 
-    entities = [
+    entities: list[HDFuryEntity] = [
         HDFurySensor(coordinator, key)
         for key in SENSOR_LIST
         if key in coordinator.data["info"]

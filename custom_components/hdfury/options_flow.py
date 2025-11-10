@@ -21,10 +21,12 @@ class HDFuryOptionsFlow(OptionsFlowWithReload):
             return self.async_create_entry(title="", data={"option_labels": user_input})
 
         current_labels = self.config_entry.options.get("option_labels", {})
-        schema = vol.Schema({
-            vol.Optional(opt, default=current_labels.get(opt, INPUT_LABELS[opt])): str
-            for opt in INPUT_LABELS
-        })
+        schema = vol.Schema(
+            {
+                vol.Optional(opt, default=current_labels.get(opt, label)): str
+                for opt, label in INPUT_LABELS.items()
+            }
+        )
 
         return self.async_show_form(
             step_id="init",

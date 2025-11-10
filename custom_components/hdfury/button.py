@@ -3,12 +3,13 @@
 from collections.abc import Awaitable, Callable
 
 from hdfury import HDFuryAPI, HDFuryError
+
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
@@ -18,7 +19,7 @@ from .entity import HDFuryEntity
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up buttons using the platform schema."""
 
@@ -51,7 +52,7 @@ class HDFuryButton(HDFuryEntity, ButtonEntity):
         self._attr_entity_category = EntityCategory.CONFIG
         self.press_fn = press_fn
 
-    async def async_press(self):
+    async def async_press(self) -> None:
         """Handle Button Press."""
 
         try:

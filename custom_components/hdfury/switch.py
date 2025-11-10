@@ -4,12 +4,13 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from hdfury import HDFuryAPI, HDFuryError
+
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN, SWITCH_MAP
 from .coordinator import HDFuryCoordinator
@@ -19,13 +20,13 @@ from .entity import HDFuryEntity
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up switches using the platform schema."""
 
     coordinator: HDFuryCoordinator = entry.runtime_data
 
-    entities = []
+    entities: list[HDFuryEntity] = []
     for key, (set_value_fn) in SWITCH_MAP.items():
         if key in coordinator.data["config"]:
             entities.append(HDFurySwitch(coordinator, key, set_value_fn))
@@ -40,7 +41,7 @@ class HDFurySwitch(HDFuryEntity, SwitchEntity):
         self,
         coordinator: HDFuryCoordinator,
         key: str,
-        set_value_fn: Callable[[HDFuryAPI], Awaitable[None]],
+        set_value_fn: Callable[[HDFuryAPI, str], Awaitable[None]],
     ) -> None:
         """Register Switch."""
 
@@ -67,7 +68,6 @@ class HDFurySwitch(HDFuryEntity, SwitchEntity):
                 translation_placeholders={"error": str(error)},
             ) from error
 
-        # Trigger HA state refresh
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
@@ -82,11 +82,10 @@ class HDFurySwitch(HDFuryEntity, SwitchEntity):
                 translation_placeholders={"error": str(error)},
             ) from error
 
-        # Trigger HA state refresh
         await self.coordinator.async_request_refresh()
 
     @property
-    def extra_state_attributes(self) -> dict:
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Set Select State Attributes."""
 
         return {"raw_value": self.coordinator.data["config"].get(self._key)}

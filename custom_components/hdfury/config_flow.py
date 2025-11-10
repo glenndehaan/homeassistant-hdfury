@@ -3,9 +3,9 @@
 import logging
 from typing import Any
 
+from hdfury import HDFuryAPI, HDFuryError
 import voluptuous as vol
 
-from hdfury import HDFuryAPI, HDFuryError
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
