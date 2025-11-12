@@ -6,9 +6,26 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import SENSOR_LIST
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
+
+
+SENSORS: list[str] = [
+    "RX0",
+    "RX1",
+    "TX0",
+    "TX1",
+    "AUD0",
+    "AUD1",
+    "AUDOUT",
+    "SINK0",
+    "EDIDA0",
+    "SINK1",
+    "EDIDA1",
+    "SINK2",
+    "EDIDA2",
+    "EARCRX",
+]
 
 
 async def async_setup_entry(
@@ -22,7 +39,7 @@ async def async_setup_entry(
 
     entities: list[HDFuryEntity] = [
         HDFurySensor(coordinator, key)
-        for key in SENSOR_LIST
+        for key in SENSORS
         if key in coordinator.data["info"]
     ]
 

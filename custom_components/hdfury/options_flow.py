@@ -6,7 +6,7 @@ import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlowWithReload
 
-from .const import INPUT_LABELS
+from .const import OPTION_INPUT_LABELS
 
 
 class HDFuryOptionsFlow(OptionsFlowWithReload):
@@ -24,7 +24,7 @@ class HDFuryOptionsFlow(OptionsFlowWithReload):
         schema = vol.Schema(
             {
                 vol.Optional(opt, default=current_labels.get(opt, label)): str
-                for opt, label in INPUT_LABELS.items()
+                for opt, label in OPTION_INPUT_LABELS.items()
             }
         )
 

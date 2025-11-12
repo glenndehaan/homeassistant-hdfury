@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from hdfury import OPERATION_MODES, HDFuryError
+from hdfury import OPERATION_MODES, TX0_INPUT_PORTS, TX1_INPUT_PORTS, HDFuryError
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
@@ -10,9 +10,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import DOMAIN, INPUT_OPTIONS, SELECT_PORT_LIST
+from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
+
+
+SELECT_PORTS: dict[str, dict[str, str]] = {
+    "portseltx0": TX0_INPUT_PORTS,
+    "portseltx1": TX1_INPUT_PORTS,
+}
 
 
 async def async_setup_entry(
@@ -28,15 +34,12 @@ async def async_setup_entry(
     custom_labels = entry.options.get("option_labels", {})
 
     entities: list[HDFuryEntity] = []
-    for key in SELECT_PORT_LIST:
+    for key, (labels) in SELECT_PORTS.items():
         if key in coordinator.data["info"]:
-            tx_index = 0 if "0" in key else 1
-            copy_label = f"Copy TX{1 - tx_index}"
-
             # Build a custom label map for this TX selector
             label_map = {
-                k: (custom_labels.get(v, v) if k != "4" else copy_label)
-                for k, v in INPUT_OPTIONS.items()
+                k: (custom_labels.get(v, v))
+                for k, v in labels.items()
             }
 
             entities.append(HDFuryPortSelect(coordinator, key, label_map))

@@ -12,9 +12,23 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import DOMAIN, SWITCH_MAP
+from .const import DOMAIN
 from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
+
+
+SWITCHES: dict[str, Callable[[HDFuryAPI, str], Awaitable[None]]] = {
+    "autosw": lambda client, value: client.set_auto_switch_inputs(value),
+    "htpcmode0": lambda client, value: client.set_htpc_mode_rx0(value),
+    "htpcmode1": lambda client, value: client.set_htpc_mode_rx1(value),
+    "htpcmode2": lambda client, value: client.set_htpc_mode_rx2(value),
+    "htpcmode3": lambda client, value: client.set_htpc_mode_rx3(value),
+    "mutetx0": lambda client, value: client.set_mute_tx0_audio(value),
+    "mutetx1": lambda client, value: client.set_mute_tx1_audio(value),
+    "oled": lambda client, value: client.set_oled(value),
+    "iractive": lambda client, value: client.set_ir_active(value),
+    "relay": lambda client, value: client.set_relay(value),
+}
 
 
 async def async_setup_entry(
@@ -27,7 +41,7 @@ async def async_setup_entry(
     coordinator: HDFuryCoordinator = entry.runtime_data
 
     entities: list[HDFuryEntity] = []
-    for key, (set_value_fn) in SWITCH_MAP.items():
+    for key, (set_value_fn) in SWITCHES.items():
         if key in coordinator.data["config"]:
             entities.append(HDFurySwitch(coordinator, key, set_value_fn))
 
