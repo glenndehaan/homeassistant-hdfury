@@ -1,10 +1,11 @@
 """Button platform for HDFury Integration."""
 
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 
 from hdfury import HDFuryAPI, HDFuryError
 
-from homeassistant.components.button import ButtonEntity
+from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
@@ -16,6 +17,29 @@ from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 
 
+@dataclass(kw_only=True, frozen=True)
+class HDFuryButtonEntityDescription(ButtonEntityDescription):
+    """Description for HDFury button entities."""
+
+    press_fn: Callable[[HDFuryAPI], Awaitable[None]]
+
+
+BUTTONS: tuple[HDFuryButtonEntityDescription, ...] = (
+    HDFuryButtonEntityDescription(
+        key="reboot",
+        translation_key="reboot",
+        entity_category=EntityCategory.CONFIG,
+        press_fn=lambda client: client.issue_reboot(),
+    ),
+    HDFuryButtonEntityDescription(
+        key="issue_hotplug",
+        translation_key="issue_hotplug",
+        entity_category=EntityCategory.CONFIG,
+        press_fn=lambda client: client.issue_hotplug(),
+    ),
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -25,38 +49,23 @@ async def async_setup_entry(
 
     coordinator: HDFuryCoordinator = entry.runtime_data
 
-    async_add_entities(
-        [
-            HDFuryButton(coordinator, "reboot", lambda client: client.issue_reboot()),
-            HDFuryButton(
-                coordinator, "issue_hotplug", lambda client: client.issue_hotplug()
-            ),
-        ],
-        True,
-    )
+    entities: list[HDFuryEntity] = [
+        HDFuryButton(coordinator, description) for description in BUTTONS
+    ]
+
+    async_add_entities(entities, True)
 
 
 class HDFuryButton(HDFuryEntity, ButtonEntity):
     """HDFury Button Class."""
 
-    def __init__(
-        self,
-        coordinator: HDFuryCoordinator,
-        key: str,
-        press_fn: Callable[[HDFuryAPI], Awaitable[None]],
-    ) -> None:
-        """Register Button."""
-
-        super().__init__(coordinator, key)
-
-        self._attr_entity_category = EntityCategory.CONFIG
-        self.press_fn = press_fn
+    entity_description: HDFuryButtonEntityDescription
 
     async def async_press(self) -> None:
         """Handle Button Press."""
 
         try:
-            await self.press_fn(self.coordinator.client)
+            await self.entity_description.press_fn(self.coordinator.client)
         except HDFuryError as error:
             raise HomeAssistantError(
                 translation_domain=DOMAIN,

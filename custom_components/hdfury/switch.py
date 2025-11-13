@@ -1,11 +1,12 @@
 """Switch platform for HDFury Integration."""
 
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from typing import Any
 
 from hdfury import HDFuryAPI, HDFuryError
 
-from homeassistant.components.switch import SwitchEntity
+from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
@@ -17,18 +18,75 @@ from .coordinator import HDFuryCoordinator
 from .entity import HDFuryEntity
 
 
-SWITCHES: dict[str, Callable[[HDFuryAPI, str], Awaitable[None]]] = {
-    "autosw": lambda client, value: client.set_auto_switch_inputs(value),
-    "htpcmode0": lambda client, value: client.set_htpc_mode_rx0(value),
-    "htpcmode1": lambda client, value: client.set_htpc_mode_rx1(value),
-    "htpcmode2": lambda client, value: client.set_htpc_mode_rx2(value),
-    "htpcmode3": lambda client, value: client.set_htpc_mode_rx3(value),
-    "mutetx0": lambda client, value: client.set_mute_tx0_audio(value),
-    "mutetx1": lambda client, value: client.set_mute_tx1_audio(value),
-    "oled": lambda client, value: client.set_oled(value),
-    "iractive": lambda client, value: client.set_ir_active(value),
-    "relay": lambda client, value: client.set_relay(value),
-}
+@dataclass(kw_only=True, frozen=True)
+class HDFurySwitchEntityDescription(SwitchEntityDescription):
+    """Description for HDFury switch entities."""
+
+    set_value_fn: Callable[[HDFuryAPI, str], Awaitable[None]]
+
+
+SWITCHES: tuple[HDFurySwitchEntityDescription, ...] = (
+    HDFurySwitchEntityDescription(
+        key="autosw",
+        translation_key="autosw",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_auto_switch_inputs(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="htpcmode0",
+        translation_key="htpcmode0",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_htpc_mode_rx0(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="htpcmode1",
+        translation_key="htpcmode1",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_htpc_mode_rx1(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="htpcmode2",
+        translation_key="htpcmode2",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_htpc_mode_rx2(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="htpcmode3",
+        translation_key="htpcmode3",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_htpc_mode_rx3(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="mutetx0",
+        translation_key="mutetx0",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_mute_tx0_audio(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="mutetx1",
+        translation_key="mutetx1",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_mute_tx1_audio(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="oled",
+        translation_key="oled",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_oled(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="iractive",
+        translation_key="iractive",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_ir_active(value),
+    ),
+    HDFurySwitchEntityDescription(
+        key="relay",
+        translation_key="relay",
+        entity_category=EntityCategory.CONFIG,
+        set_value_fn=lambda client, value: client.set_relay(value),
+    ),
+)
 
 
 async def async_setup_entry(
@@ -40,10 +98,11 @@ async def async_setup_entry(
 
     coordinator: HDFuryCoordinator = entry.runtime_data
 
-    entities: list[HDFuryEntity] = []
-    for key, (set_value_fn) in SWITCHES.items():
-        if key in coordinator.data["config"]:
-            entities.append(HDFurySwitch(coordinator, key, set_value_fn))
+    entities: list[HDFuryEntity] = [
+        HDFurySwitch(coordinator, description)
+        for description in SWITCHES
+        if description.key in coordinator.data["config"]
+    ]
 
     async_add_entities(entities, True)
 
@@ -51,30 +110,33 @@ async def async_setup_entry(
 class HDFurySwitch(HDFuryEntity, SwitchEntity):
     """Base HDFury Switch Class."""
 
-    def __init__(
-        self,
-        coordinator: HDFuryCoordinator,
-        key: str,
-        set_value_fn: Callable[[HDFuryAPI, str], Awaitable[None]],
-    ) -> None:
-        """Register Switch."""
-
-        super().__init__(coordinator, key)
-
-        self._attr_entity_category = EntityCategory.CONFIG
-        self.set_value_fn = set_value_fn
+    entity_description: HDFurySwitchEntityDescription
 
     @property
     def is_on(self) -> bool:
         """Set Switch State."""
 
-        return self.coordinator.data["config"].get(self._key) in ["1", "on", "true"]
+        return self.coordinator.data["config"].get(self.entity_description.key) in [
+            "1",
+            "on",
+            "true",
+        ]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Set Select State Attributes."""
+
+        return {
+            "raw_value": self.coordinator.data["config"].get(
+                self.entity_description.key
+            )
+        }
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Handle Switch On Event."""
 
         try:
-            await self.set_value_fn(self.coordinator.client, "on")
+            await self.entity_description.set_value_fn(self.coordinator.client, "on")
         except HDFuryError as error:
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
@@ -88,7 +150,7 @@ class HDFurySwitch(HDFuryEntity, SwitchEntity):
         """Handle Switch Off Event."""
 
         try:
-            await self.set_value_fn(self.coordinator.client, "off")
+            await self.entity_description.set_value_fn(self.coordinator.client, "off")
         except HDFuryError as error:
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
@@ -97,9 +159,3 @@ class HDFurySwitch(HDFuryEntity, SwitchEntity):
             ) from error
 
         await self.coordinator.async_request_refresh()
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Set Select State Attributes."""
-
-        return {"raw_value": self.coordinator.data["config"].get(self._key)}
