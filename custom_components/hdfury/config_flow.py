@@ -26,16 +26,13 @@ class HDFuryConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle Initial Setup."""
 
-        errors = {}
+        errors: dict[str, str] = {}
 
         if user_input is not None:
             host = user_input[CONF_HOST]
 
-            # Check for existing entry with same host
-            for entry in self._async_current_entries():
-                if entry.data.get("host") == host:
-                    errors["base"] = "already_configured"
-                    break
+            await self.async_set_unique_id(host)
+            self._abort_if_unique_id_configured()
 
             # Proceed normally (And check connection)
             if not errors:
