@@ -3,6 +3,7 @@
 import logging
 from typing import Any
 
+import aiohttp
 from hdfury import HDFuryAPI, HDFuryError
 import voluptuous as vol
 
@@ -40,8 +41,7 @@ class HDFuryConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title=f"HDFury ({host})", data=user_input
                     )
-                else:
-                    errors["base"] = "cannot_connect"
+                errors["base"] = "cannot_connect"
 
         return self.async_show_form(
             step_id="user",
@@ -56,7 +56,7 @@ class HDFuryConfigFlow(ConfigFlow, domain=DOMAIN):
 
         try:
             await client.get_board()
-        except HDFuryError as error:
+        except (HDFuryError, TimeoutError, aiohttp.ClientError) as error:
             _LOGGER.error("%s", error)
             return False
 
