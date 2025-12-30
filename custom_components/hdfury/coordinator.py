@@ -26,8 +26,9 @@ class HDFuryCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name="HDFury",
-            update_interval=timedelta(seconds=30),
+            update_interval=timedelta(seconds=60),
         )
         self.host: str = entry.data[CONF_HOST]
         self.client: HDFuryAPI = HDFuryAPI(self.host, async_get_clientsession(hass))
