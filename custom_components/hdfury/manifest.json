@@ -6,6 +6,6 @@
   "documentation": "https://github.com/glenndehaan/homeassistant-hdfury",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/glenndehaan/homeassistant-hdfury/issues",
-  "requirements": ["hdfury==1.3.1"],
-  "version": "1.5.8"
+  "requirements": ["hdfury==1.4.0"],
+  "version": "1.6.0"
 }
