@@ -21,7 +21,7 @@
   "activeip": "activeip 10.0.1.32/255.255.255.0/10.0.1.1",
   "dhcp": "1",
   "tcpport": "2210",
-  "macaddr": "XX:XX:XX:XX:XX:XX",
+  "macaddr": "39:39:39:39:39:39",
   "mdns": "1",
   "ipinterrupt": "0",
   "reboottimer": "0",

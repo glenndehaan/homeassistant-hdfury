@@ -1,0 +1,23 @@
+{
+  "lagtestenable": "0",
+  "lagtesttarget": "0",
+  "hdrprofile": "5",
+  "ledprofilevideo": "1",
+  "ledprofilesync": "0",
+  "ledprofilens": "0",
+  "redgain": "30",
+  "greengain": "27",
+  "bluegain": "24",
+  "ledcolorred": "64",
+  "ledcolorgreen": "64",
+  "ledcolorblue": "64",
+  "ledspeedpulsate": "25",
+  "ledspeedrotate": "25",
+  "leddelay": "50",
+  "ledbbdet": "0",
+  "ledgamma": "0",
+  "ledsynckeep": "0",
+  "leddim": "0",
+  "ledstripenabled": "0",
+  "ledpatmode": "0"
+}
