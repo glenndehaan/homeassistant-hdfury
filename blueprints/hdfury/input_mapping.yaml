@@ -1,0 +1,106 @@
+blueprint:
+  name: HDFury Input Mapping
+  description: >
+    Two-way synchronization between a user-defined Select helper
+    (friendly input names) and the HDFury input select entity.
+  domain: automation
+
+  input:
+    user_select:
+      name: User Select Helper
+      description: Select helper with friendly input names
+      selector:
+        entity:
+          domain: input_select
+
+    hdfury_select:
+      name: HDFury Input Select
+      description: >
+        Input select entity provided by the HDFury integration
+      selector:
+        entity:
+          filter:
+            - integration: hdfury
+              domain: select
+
+    mappings:
+      name: Input Mappings
+      description: >
+        Map HDFury input values to friendly names.
+        Example:
+          0: Apple TV
+          1: PlayStation
+          2: Blu-ray
+          3: Chromecast
+          4: Copy TX1
+      selector:
+        object:
+          fields:
+            "0":
+              label: Input 0
+              required: true
+              selector:
+                text:
+            "1":
+              label: Input 1
+              required: true
+              selector:
+                text:
+            "2":
+              label: Input 2
+              required: true
+              selector:
+                text:
+            "3":
+              label: Input 3
+              required: true
+              selector:
+                text:
+            "4":
+              label: Copy TX
+              required: true
+              selector:
+                text:
+
+mode: single
+
+trigger:
+  - platform: state
+    entity_id: !input user_select
+
+  - platform: state
+    entity_id: !input hdfury_select
+
+variables:
+  mapping: !input mappings
+  reverse_mapping: "{{ dict(mapping.items() | map('reverse')) }}"
+  user_entity: !input user_select
+  hdfury_entity: !input hdfury_select
+  from_entity: "{{ trigger.entity_id }}"
+  new_state: "{{ trigger.to_state.state }}"
+
+action:
+  - choose:
+      # User helper → HDFury
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ from_entity == user_entity and new_state in reverse_mapping }}
+        sequence:
+          - service: select.select_option
+            target:
+              entity_id: !input hdfury_select
+            data:
+              option: "{{ reverse_mapping[new_state] | string }}"
+
+      # HDFury → User helper
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ from_entity == hdfury_entity and new_state|string in mapping }}
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: !input user_select
+            data:
+              option: "{{ mapping[new_state|string] }}"

@@ -2,6 +2,113 @@
 
 This custom integration allows Home Assistant to monitor and control compatible [HDFury](https://www.hdfury.com/) devices such as Diva, Vertex2, and VRROOM over the local network.
 
+> ⚠️ **Deprecated**
+> 
+> This custom component has been superseded by the [HDFury core integration](https://home-assistant.io/integrations/hdfury) included in Home Assistant 2026.2+.  
+> Please migrate to the [core integration](https://home-assistant.io/integrations/hdfury). [Follow the guide below](#migration-to-core)
+> 
+> ❤️ Thank you to everyone who used, tested, and contributed to this custom integration.
+> The move to a [core integration](https://home-assistant.io/integrations/hdfury) ensures better stability, long-term support, and commitment to Home Assistant standards for all HDFury users.
+
+## Migration to Core
+
+As of Home Assistant 2026.2, HDFury is now available as a [core integration](https://home-assistant.io/integrations/hdfury).
+This custom component is **deprecated** and will no longer receive updates or support.
+
+**All users are strongly encouraged to migrate to the core integration by following the guide below:**
+
+> ⚠️ Important:
+> Due to internal changes between the custom integration and the core integration, **you must remove existing HDFury devices before removing the custom component**.
+> Failing to do so may leave orphaned devices or entities in Home Assistant.
+
+### Step 1: Remove HDFury Devices
+
+1. Go to Settings → Devices & services
+2. Locate your HDFury integration
+3. Click the integration
+4. Select each HDFury device
+5. Click Delete Device
+
+### Step 2: Remove the Custom Integration
+
+#### If Installed via HACS
+
+1. Go to **HACS**
+2. Find **HDFury**
+3. Click the three dots → **Remove**
+4. Confirm removal
+
+#### If Manually Installed
+
+1. Remove the directory:
+   ```text
+   config/custom_components/hdfury
+   ```
+2. Ensure **no HDFury files remain** in `custom_components`
+
+### Step 3: Restart Home Assistant
+
+Perform a **full restart** (not just a reload):
+
+**Settings → Click the three dots → Restart Home Assistant**
+
+> This is required to avoid conflicts between the custom and core integration.
+
+### Step 4: Add the Core HDFury Integration
+
+Your HDFury device should be discovered automatically on the network.
+If not follow these steps to add your devices:
+
+1. Go to **Settings → Devices & services**
+2. Click **Add Integration**
+3. Search for **HDFury**
+4. Follow the configuration flow:
+   * Device IP or hostname
+
+Once completed, your device should appear under **Devices**.
+
+### Step 5: Verify Entities & Automations
+
+The core integration aims to preserve entity naming, but **entity IDs may change** in some cases.
+Update any:
+
+* Automations
+* Scripts
+* Dashboards
+* Templates
+
+### What Happens If I Don’t Migrate?
+
+* You may receive warnings or errors
+* Future Home Assistant updates may **break the custom integration**
+* No fixes or support will be provided for this repository
+
+### Input Label Remapping (Removed)
+
+The custom HDFury integration provided an option to remap input labels (e.g. Input 1, Input 2) to **custom user-defined names**.
+
+This functionality is **not available** in the Home Assistant core integration.
+
+#### Why Was This Removed?
+
+Home Assistant core integrations follow strict design guidelines:
+
+- Integrations should reflect the **actual state of the device**
+- UI customization and user preferences should be handled via **helpers and automations**
+- Device-specific options should not be used to implement UI-only behavior
+
+Because input label remapping does not change the device state, but only affects how it is presented in Home Assistant, it was intentionally excluded from the core integration.
+
+#### Recommended Alternative
+
+To achieve the same result, we recommend using:
+
+- A Select helper with your labels (input_select)
+- One or more automations to map user-friendly labels to HDFury inputs
+- Or utilize the blueprint available here: https://github.com/glenndehaan/homeassistant-hdfury/blob/master/blueprints/hdfury/input_mapping.yaml
+
+---
+
 ## Features
 
 * Setup via config flow (no YAML required)

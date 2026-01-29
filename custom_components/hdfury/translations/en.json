@@ -143,5 +143,11 @@
     "data_error": {
       "message": "Data inconsistency: {error}"
     }
+  },
+  "issues": {
+    "custom_component_migration": {
+      "description": "The HDFury custom component has been deprecated. Please migrate to the core component released in Home Assistant 2026.2",
+      "title": "HDFury custom component deprecated"
+    }
   }
 }

@@ -143,5 +143,11 @@
     "data_error": {
       "message": "Data inconsistency: {error}"
     }
+  },
+  "issues": {
+    "custom_component_migration": {
+      "description": "As of Home Assistant 2026.2, HDFury is now available as a core integration. This custom component is deprecated and will no longer receive updates or support. Follow the link below to migrate to the core integration.",
+      "title": "HDFury custom component deprecated"
+    }
   }
 }
